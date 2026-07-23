@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/splash/repositories/splash_repository.dart';
 
+//
 class SplashController extends GetxController {
   final SplashRepository _splashRepository;
   SplashController(this._splashRepository);

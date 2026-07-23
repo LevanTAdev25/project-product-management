@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:get/get.dart';
 
+//
 class BaseHandleResponse {
   static Never handleDioResponse(DioException e) {
     if (e.response?.statusCode == 401) {

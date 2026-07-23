@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
 
+//
 class CartService extends GetxService {
   late Box<CartRequest> cartBox;
   Future<CartService> init() async {

@@ -3,6 +3,7 @@ import 'package:prjgetxmvc/modules/cart/models/cart_response.dart';
 import 'package:prjgetxmvc/modules/product/models/category.dart';
 part 'cart_request.g.dart';
 
+//
 @HiveType(typeId: 2)
 class CartRequest {
   @HiveField(0)

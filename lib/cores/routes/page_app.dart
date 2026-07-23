@@ -6,3 +6,4 @@ class AppPage {
   static final DETAIL_PRODUCT = "/detail_product";
   static final CART = "/cart";
 }
+//

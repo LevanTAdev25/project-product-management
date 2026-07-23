@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 part 'login_response.g.dart';
 
+//
 @HiveType(typeId: 0)
 class LoginResponse {
   @HiveField(0)

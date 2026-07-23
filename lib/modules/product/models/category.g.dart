@@ -5,7 +5,7 @@ part of 'category.dart';
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
-
+//
 class CategoryAdapter extends TypeAdapter<Category> {
   @override
   final int typeId = 1;
@@ -16,10 +16,7 @@ class CategoryAdapter extends TypeAdapter<Category> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Category(
-      fields[0] as int,
-      fields[1] as String,
-    );
+    return Category(fields[0] as int, fields[1] as String);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/cores/services/auth_service.dart';
 
+//
 class BaseUnauthorized {
   static bool _isHandling = false;
   static Future<void> handleUnauthorized() async {

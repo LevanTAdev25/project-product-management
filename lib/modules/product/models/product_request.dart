@@ -1,5 +1,6 @@
 import 'package:prjgetxmvc/modules/product/models/category.dart';
 
+//
 class ProductRequest {
   int id;
   String name;

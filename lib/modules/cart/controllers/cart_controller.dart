@@ -6,6 +6,7 @@ import 'package:prjgetxmvc/modules/cart/models/cart_response.dart';
 import 'package:prjgetxmvc/modules/cart/repositories/cart_repository.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
 
+//
 class CartController extends GetxController {
   final CartRepository _cartRepository;
   final cartList = <CartResponse>[].obs;

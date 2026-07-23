@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:prjgetxmvc/modules/login/models/login_response.dart';
 
+//
 class AuthService extends GetxService {
   late Box<LoginResponse> _authBox;
   bool isLoggedIn = false;

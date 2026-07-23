@@ -1,5 +1,6 @@
 import 'package:prjgetxmvc/modules/product/models/category.dart';
 
+//
 class ProductResponse {
   final int id;
   final String name;
