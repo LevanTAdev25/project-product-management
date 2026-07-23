@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
 import 'package:prjgetxmvc/modules/product/models/category.dart';
 
+//
 class BaseForm extends GetView<ProductController> {
   final bool baseFormState;
   BaseForm({super.key, required this.baseFormState});

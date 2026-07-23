@@ -8,4 +8,4 @@ class LoginRequest {
       'password': loginRequest.password,
     };
   }
-}
+} //

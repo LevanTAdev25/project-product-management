@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 part 'category.g.dart';
 
+//
 @HiveType(typeId: 1)
 class Category {
   @HiveField(0)

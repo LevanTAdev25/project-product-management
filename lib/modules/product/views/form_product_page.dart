@@ -5,6 +5,7 @@ import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_form.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
 
+//
 class FormProductPage extends GetView<ProductController> {
   @override
   Widget build(BuildContext context) {

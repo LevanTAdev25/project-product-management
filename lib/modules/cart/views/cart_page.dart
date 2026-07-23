@@ -5,6 +5,7 @@ import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/modules/cart/controllers/cart_controller.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
 
+//
 class CartPage extends GetView<CartController> {
   @override
   Widget build(BuildContext context) {

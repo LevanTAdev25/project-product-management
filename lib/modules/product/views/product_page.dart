@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
-
+//
 part 'build_chip_filter_widget.dart';
 
 class ProductPage extends GetView<ProductController> {

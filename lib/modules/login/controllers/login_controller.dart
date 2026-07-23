@@ -6,6 +6,7 @@ import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/login/models/login_request.dart';
 import 'package:prjgetxmvc/modules/login/repositories/login_repository.dart';
 
+//
 class LoginController extends GetxController {
   final LoginRepository _loginRepository;
   final TextEditingController usernameController = TextEditingController();
