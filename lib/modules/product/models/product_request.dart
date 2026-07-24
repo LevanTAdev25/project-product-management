@@ -1,4 +1,4 @@
-import 'package:prjgetxmvc/modules/product/models/category.dart';
+import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 
 //
 class ProductRequest {
@@ -7,7 +7,7 @@ class ProductRequest {
   String code;
   double price;
   int stock;
-  Category category;
+  CategoryRequest category;
   String description;
   String image;
   ProductRequest(

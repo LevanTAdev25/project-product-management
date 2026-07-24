@@ -83,7 +83,7 @@ class CartPage extends GetView<CartController> {
                         final productRequest = CartRequest.mapToCartRequest(
                           product,
                         );
-                        controller.decreaseCart(productRequest);
+                        controller.decreaseCart(productRequest.id);
                       },
                       icon: Icon(Icons.remove),
                     ),
@@ -95,7 +95,7 @@ class CartPage extends GetView<CartController> {
                         final productRequest = CartRequest.mapToCartRequest(
                           product,
                         );
-                        controller.increaseCart(productRequest);
+                        controller.increaseCart(productRequest.id);
                       },
                       icon: Icon(Icons.add),
                     ),

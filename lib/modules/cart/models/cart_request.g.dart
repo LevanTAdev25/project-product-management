@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-//
+
 part of 'cart_request.dart';
 
 // **************************************************************************
@@ -22,7 +22,7 @@ class CartRequestAdapter extends TypeAdapter<CartRequest> {
       fields[2] as String,
       fields[3] as double,
       fields[4] as int,
-      fields[5] as Category,
+      fields[5] as CategoryResponse,
       fields[6] as String,
       fields[7] as String,
       fields[8] as int,

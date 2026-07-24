@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
-import 'package:prjgetxmvc/modules/product/models/category.dart';
 
 //
 class BaseForm extends GetView<ProductController> {
@@ -138,17 +138,38 @@ class BaseForm extends GetView<ProductController> {
   }
 
   Widget _buildCategoryDropDown() {
+    if (controller.categoriesList.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 8),
+            Text("Đang tải danh mục..."),
+          ],
+        ),
+      );
+    }
+
+    // Đảm bảo selectedCategory.value hợp lệ trong danh sách
+    final currentValue =
+        controller.categoriesList.contains(controller.selectedCategory.value)
+        ? controller.selectedCategory.value
+        : controller.categoriesList.first;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.white,
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<Category>(
-          value:
-              controller.selectedCategory.value ??
-              controller.categoriesList.first,
+        child: DropdownButton<CategoryResponse>(
+          value: currentValue,
           isExpanded: true,
           items: controller.categoriesList.map((category) {
-            return DropdownMenuItem<Category>(
+            return DropdownMenuItem<CategoryResponse>(
               value: category,
               child: Text(category.name),
             );

@@ -1,9 +1,9 @@
-import 'package:prjgetxmvc/modules/product/models/category.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 
 //
 class GetPaginationParams {
   final int page;
   final int limit;
-  final Category? category;
+  final CategoryResponse? category;
   GetPaginationParams({required this.page, required this.limit, this.category});
 }

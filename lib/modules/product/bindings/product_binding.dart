@@ -6,9 +6,9 @@ import 'package:prjgetxmvc/modules/product/repositories/product_repository.dart'
 class ProductBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<ProductRepository>(() => ProductRepository(Get.find()));
+    Get.lazyPut<ProductRepository>(() => ProductRepository());
     Get.lazyPut<ProductController>(
-      () => ProductController(Get.find()),
+      () => ProductController(Get.find(), Get.find()),
       fenix: true,
     );
   }

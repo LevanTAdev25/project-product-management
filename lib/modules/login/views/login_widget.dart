@@ -24,7 +24,7 @@ extension LoginForm on LoginPage {
               focusNode: controller.usernameFocusNode,
               nextFocusNode: controller.passwordFocusNode,
               label: "Tài khoản",
-              controller: controller.usernameController,
+              textController: controller.usernameController,
               emptyError: "Tài khoản không được để trống",
               icon: Icon(Icons.person),
               isObscure: false,
@@ -35,12 +35,21 @@ extension LoginForm on LoginPage {
               context: context,
               focusNode: controller.passwordFocusNode,
               label: "Mật khẩu",
-              controller: controller.passwordController,
+              textController: controller.passwordController,
               emptyError: "Mật khẩu không được để trống",
               icon: Icon(Icons.key),
-              isObscure: true,
+              isObscure: !controller.isShowPassword.value,
               baseFormState: controller.isLoading.value,
+
+              onTogglePassword: controller.togglePasswordVisibility,
+              isShowPassword: controller.isShowPassword.value,
+              onSubmitted: () {
+                if (controller.keyLoginForm.currentState?.validate() ?? false) {
+                  controller.login();
+                }
+              },
             ),
+
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: controller.isLoading.value
@@ -70,6 +79,18 @@ extension LoginForm on LoginPage {
                     )
                   : Text("Đăng nhập"),
             ),
+            const SizedBox(height: 12),
+
+            TextButton.icon(
+              onPressed: controller.isLoading.value
+                  ? null
+                  : controller.clearLoginForm,
+              icon: const Icon(Icons.delete_outline, color: Colors.black),
+              label: const Text(
+                "Xóa tất cả",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
           ],
         ),
       );
@@ -81,11 +102,14 @@ extension LoginForm on LoginPage {
     required FocusNode focusNode,
     FocusNode? nextFocusNode,
     required String label,
-    required TextEditingController controller,
+    required TextEditingController textController,
     required String emptyError,
     required Icon icon,
     required bool isObscure,
     required bool baseFormState,
+    VoidCallback? onTogglePassword,
+    bool isShowPassword = false,
+    VoidCallback? onSubmitted,
   }) {
     return Padding(
       padding: EdgeInsets.all(10),
@@ -93,9 +117,12 @@ extension LoginForm on LoginPage {
         focusNode: focusNode,
         obscureText: isObscure,
         enabled: !baseFormState,
-        controller: controller,
+        controller: textController,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         keyboardType: TextInputType.text,
+        textInputAction: nextFocusNode != null
+            ? TextInputAction.next
+            : TextInputAction.done,
         validator: (value) {
           if (value == null || value.isEmpty) return emptyError;
           return null;
@@ -112,9 +139,27 @@ extension LoginForm on LoginPage {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey[300]!),
           ),
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (onTogglePassword != null)
+                IconButton(
+                  tooltip: isShowPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu",
+                  onPressed: baseFormState ? null : onTogglePassword,
+                  icon: Icon(
+                    isShowPassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                ),
+            ],
+          ),
         ),
-        onFieldSubmitted: (value) {
-          FocusScope.of(context).requestFocus(nextFocusNode);
+        onFieldSubmitted: (_) {
+          if (nextFocusNode != null) {
+            FocusScope.of(context).requestFocus(nextFocusNode);
+          } else {
+            FocusScope.of(context).unfocus();
+            onSubmitted?.call();
+          }
         },
       ),
     );

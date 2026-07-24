@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
-import 'package:get/get.dart';
 
 //
 class BaseHandleResponse {
@@ -14,16 +12,5 @@ class BaseHandleResponse {
       throw Exception(message);
     }
     throw Exception("Lỗi khi kết nối với máy chủ");
-  }
-
-  static void handleExceptionResponse(Object e) {
-    final message = e.toString().replaceAll("Exception: ", "");
-    Get.snackbar(
-      "Đăng nhập thất bại",
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.redAccent.withOpacity(0.8),
-      colorText: Colors.white,
-    );
   }
 }

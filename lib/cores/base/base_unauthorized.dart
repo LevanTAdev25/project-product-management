@@ -11,11 +11,7 @@ class BaseUnauthorized {
     _isHandling = true;
     try {
       final authService = Get.find<AuthService>();
-      // final cartService = Get.find<CartService>();
-
       await authService.clearToken();
-      // await cartService.clearCart();
-
       Get.snackbar(
         "Phiên đăng nhập hết hạn",
         "Vui lòng đăng nhập lại",

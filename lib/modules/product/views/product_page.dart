@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
+import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
+import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
+import 'package:prjgetxmvc/modules/category/controllers/category_controller.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
 //
 part 'build_chip_filter_widget.dart';
@@ -125,6 +128,7 @@ class ProductPage extends GetView<ProductController> {
                       title: category.name,
                       isSelected: isSelected,
                       onTap: () async {
+                        controller.searchController.clear();
                         controller.selectedCategory.value = category;
                         await controller.loadProductList();
                       },
@@ -164,24 +168,6 @@ class ProductPage extends GetView<ProductController> {
                   ),
                 );
               }
-              if (controller.displayedProducts.isEmpty) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.inventory_2_outlined, color: Colors.grey),
-                      Text(
-                        "Không có sản phẩm nào thuộc danh mục này",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
               return RefreshIndicator(
                 key: controller.refreshIndicatorKey,
                 onRefresh: controller.handleRefresh,
@@ -190,7 +176,7 @@ class ProductPage extends GetView<ProductController> {
                     GridView.builder(
                       controller: controller.scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 10,
@@ -341,19 +327,22 @@ class ProductPage extends GetView<ProductController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        key: const ValueKey("add_product"),
         backgroundColor: accentColor,
         foregroundColor: Colors.black,
         onPressed: () {
           try {
+            if (controller.categoriesList.isEmpty) {
+              throw CategoryEmptyListException();
+            }
             controller.selectedCategory.value = controller.categoriesList.first;
             controller.updateTextEditingController();
             Get.toNamed(AppPage.FORM_PRODUCT, arguments: {"isEdit": false});
           } catch (e) {
-            Get.snackbar(
-              "Lỗi",
-              "Không kết nối được tới server",
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
+            BaseSnackBar.showSnackBar(
+              title: "Lỗi",
+              content: e.toString().replaceAll("Exception: ", ""),
+              color: Colors.redAccent,
             );
           }
         },
@@ -373,6 +362,12 @@ class ProductPage extends GetView<ProductController> {
                   ),
                 ],
               ),
+            ),
+            ListTile(
+              title: const Text("Quản lý danh mục"),
+              onTap: () {
+                Get.toNamed(AppPage.CATEGORY_MANAGER);
+              },
             ),
             ListTile(
               title: const Text("Đăng xuất"),

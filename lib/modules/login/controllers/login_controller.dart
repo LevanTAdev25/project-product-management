@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_handle_response.dart';
+import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/login/models/login_request.dart';
@@ -15,6 +16,7 @@ class LoginController extends GetxController {
   final passwordFocusNode = FocusNode();
   final keyLoginForm = GlobalKey<FormState>();
   final isLoading = false.obs;
+  final isShowPassword = false.obs;
   bool loginSuccess = false;
 
   LoginController(this._loginRepository);
@@ -25,6 +27,27 @@ class LoginController extends GetxController {
     usernameFocusNode.dispose();
     passwordFocusNode.dispose();
     super.onClose();
+  }
+
+  void togglePasswordVisibility() {
+    isShowPassword.value = !isShowPassword.value;
+  }
+
+  void clearUsername() {
+    usernameController.clear();
+    usernameFocusNode.requestFocus();
+  }
+
+  void clearPassword() {
+    passwordController.clear();
+    passwordFocusNode.requestFocus();
+  }
+
+  void clearLoginForm() {
+    usernameController.clear();
+    passwordController.clear();
+    keyLoginForm.currentState?.reset();
+    usernameFocusNode.requestFocus();
   }
 
   void login() async {
@@ -47,9 +70,17 @@ class LoginController extends GetxController {
         loginSuccess = false;
       }
     } on UnauthorizedException catch (e) {
-      BaseHandleResponse.handleExceptionResponse(e);
+      BaseSnackBar.showSnackBar(
+        title: "Thất bại",
+        content: e.toString().replaceAll("Exception: ", ""),
+        color: Colors.redAccent,
+      );
     } catch (e) {
-      BaseHandleResponse.handleExceptionResponse(e);
+      BaseSnackBar.showSnackBar(
+        title: "Lỗi",
+        content: e.toString().replaceAll("Exception: ", ""),
+        color: Colors.redAccent,
+      );
     } finally {
       isLoading.value = false;
     }
