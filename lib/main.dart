@@ -23,8 +23,9 @@ void main() async {
       () => CartRepository().init(),
       permanent: true,
     );
-  } catch (e) {
-    return;
+  } catch (e, stackTrace) {
+    debugPrint("Không thể khởi tạo ứng dụng: $e");
+    debugPrintStack(stackTrace: stackTrace);
   }
   runApp(const MyApp());
 }
