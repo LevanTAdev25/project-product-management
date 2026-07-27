@@ -17,7 +17,6 @@ class LoginController extends GetxController {
   final keyLoginForm = GlobalKey<FormState>();
   final isLoading = false.obs;
   final isShowPassword = false.obs;
-  bool loginSuccess = false;
 
   LoginController(this._loginRepository);
   @override
@@ -58,17 +57,14 @@ class LoginController extends GetxController {
         passwordController.text,
       );
       await _loginRepository.login(loginRequest);
-      loginSuccess = true;
-      if (loginSuccess = true) {
-        Get.rawSnackbar(
-          title: "Đăng nhập thành công",
-          message: "Đăng nhập thành công",
-          backgroundColor: Colors.green,
-          borderColor: Colors.white,
-        );
-        Get.offAndToNamed(AppPage.PRODUCTS);
-        loginSuccess = false;
-      }
+
+      Get.rawSnackbar(
+        title: "Đăng nhập thành công",
+        message: "Đăng nhập thành công",
+        backgroundColor: Colors.green,
+        borderColor: Colors.white,
+      );
+      Get.offAndToNamed(AppPage.PRODUCTS);
     } on UnauthorizedException catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Thất bại",

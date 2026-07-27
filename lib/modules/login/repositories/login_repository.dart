@@ -20,7 +20,7 @@ class LoginRepository {
         loginRequest.password,
         response.data['data']['access_token'],
       );
-      _authService.putToken(loginResponse);
+      await _authService.putToken(loginResponse);
     }
   }
 }
