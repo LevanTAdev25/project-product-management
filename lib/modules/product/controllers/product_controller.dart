@@ -293,6 +293,8 @@ class ProductController extends GetxController {
         content: "Xóa sản phẩm thành công",
         color: Colors.green,
       );
+      await _cartRepository.removeCart(id);
+      countCartItem();
       isLoading.value = false;
       await loadProductList(reset: true);
     } on UnauthorizedException {
