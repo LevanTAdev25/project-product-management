@@ -3,19 +3,25 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
+import 'package:prjgetxmvc/cores/exceptions/cart_exception.dart';
+import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
+import 'package:prjgetxmvc/cores/exceptions/product_exception.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:prjgetxmvc/cores/params/get_pagination_params.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/cores/services/auth_service.dart';
-import 'package:prjgetxmvc/cores/services/cart_service.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
-import 'package:prjgetxmvc/modules/product/models/category.dart';
+import 'package:prjgetxmvc/modules/cart/repositories/cart_repository.dart';
+import 'package:prjgetxmvc/modules/category/models/category_request.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/product/models/product_request.dart';
 import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 import 'package:prjgetxmvc/modules/product/repositories/product_repository.dart';
 
+//
 class ProductController extends GetxController {
   final ProductRepository _productRepository;
+  final CartRepository _cartRepository;
   final addKeyForm = GlobalKey<FormState>();
   final updateKeyForm = GlobalKey<FormState>();
   final refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
@@ -24,8 +30,8 @@ class ProductController extends GetxController {
   final isError = false.obs;
 
   final productList = <ProductResponse>[];
-  final categoriesList = <Category>[].obs;
-  final selectedCategory = Rx<Category?>(null);
+  final categoriesList = <CategoryResponse>[].obs;
+  final selectedCategory = Rx<CategoryResponse?>(null);
   final errorMessage = RxnString();
   final displayedProducts = <ProductResponse>[].obs;
   final countItem = 0.obs;
@@ -53,7 +59,7 @@ class ProductController extends GetxController {
   final stockProductFocusNode = FocusNode();
   final descriptionProductFocusNode = FocusNode();
   final imageProductFocusNode = FocusNode();
-  ProductController(this._productRepository);
+  ProductController(this._productRepository, this._cartRepository);
   @override
   void onInit() {
     super.onInit();
@@ -95,11 +101,7 @@ class ProductController extends GetxController {
 
   void applyFilter() async {
     Iterable<ProductResponse> result = productList;
-    if (selectedCategory.value != null) {
-      result = result.where(
-        (product) => product.category.id == selectedCategory.value!.id,
-      );
-    }
+
     if (searchController.text.isNotEmpty) {
       result = result.where(
         (product) => product.name.toLowerCase().contains(
@@ -146,6 +148,7 @@ class ProductController extends GetxController {
   }
 
   Future<void> loadProductList({bool reset = false}) async {
+    if (isLoading.value) return;
     isLoading.value = true;
     isError.value = false;
     errorMessage.value = null;
@@ -156,16 +159,18 @@ class ProductController extends GetxController {
       if (reset) {
         selectedCategory.value = null;
       }
-      productList.assignAll(
-        await _productRepository.getProductList(
-          GetPaginationParams(
-            page: _page,
-            limit: _limit,
-            category: selectedCategory.value,
-          ),
+      final tempProductList = await _productRepository.getProductList(
+        GetPaginationParams(
+          page: _page,
+          limit: _limit,
+          category: selectedCategory.value,
         ),
       );
-      applyFilter();
+      if (tempProductList.isEmpty) {
+        throw ProductEmptyException();
+      }
+      productList.assignAll(tempProductList);
+      displayedProducts.assignAll(productList);
       if (productList.length < _limit) {
         _hasMore = false;
       }
@@ -173,7 +178,7 @@ class ProductController extends GetxController {
       BaseUnauthorized.handleUnauthorized();
     } catch (e) {
       isError.value = true;
-      errorMessage.value = "Danh sách sản phẩm trống";
+      errorMessage.value = e.toString().replaceAll("Exception: ", "");
     } finally {
       isLoading.value = false;
     }
@@ -186,11 +191,17 @@ class ProductController extends GetxController {
     errorMessage.value = null;
     try {
       categoriesList.assignAll(await _productRepository.getCategoriesList());
+      if (categoriesList.isEmpty) {
+        throw CategoryEmptyListException();
+      }
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } catch (e) {
-      isError.value = true;
-      errorMessage.value = "Danh sách sản phẩm trống";
+      BaseSnackBar.showSnackBar(
+        title: "Lỗi",
+        content: e.toString().replaceAll("Exception", ""),
+        color: Colors.redAccent,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -223,13 +234,14 @@ class ProductController extends GetxController {
       BaseUnauthorized.handleUnauthorized();
     } catch (e) {
       isError.value = true;
-      errorMessage.value = "Danh sách sản phẩm trống";
+      errorMessage.value = e.toString().replaceAll("Exception: ", "");
     } finally {
       isLoadingMore.value = false;
     }
   }
 
   Future<void> addProduct() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     isError.value = false;
     errorMessage.value = null;
@@ -240,7 +252,10 @@ class ProductController extends GetxController {
         codeEditingController.text,
         double.parse(priceEditingController.text),
         int.parse(stockEditingController.text),
-        selectedCategory.value!,
+        CategoryRequest(
+          selectedCategory.value!.id,
+          selectedCategory.value!.name,
+        ),
         descriptionEditingController.text,
         imageEditingController.text,
       );
@@ -251,13 +266,14 @@ class ProductController extends GetxController {
         content: "Thêm sản phẩm thành công",
         color: Colors.green,
       );
+      isLoading.value = false;
       await loadProductList(reset: true);
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Thất bại",
-        content: "Không thể thêm sản phẩm",
+        content: e.toString().replaceAll("Exception: ", ""),
         color: Colors.red,
       );
     } finally {
@@ -265,7 +281,7 @@ class ProductController extends GetxController {
     }
   }
 
-  void removeProduct(int id) async {
+  Future<void> removeProduct(int id) async {
     if (isLoading.value) return;
     isLoading.value = true;
     isError.value = false;
@@ -277,13 +293,16 @@ class ProductController extends GetxController {
         content: "Xóa sản phẩm thành công",
         color: Colors.green,
       );
+      await _cartRepository.removeCart(id);
+      countCartItem();
+      isLoading.value = false;
       await loadProductList(reset: true);
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Thất bại",
-        content: "Xóa sản phẩm thất bại",
+        content: e.toString().replaceAll("Exception: ", ""),
         color: Colors.red,
       );
     } finally {
@@ -303,7 +322,10 @@ class ProductController extends GetxController {
         codeEditingController.text,
         double.parse(priceEditingController.text),
         int.parse(stockEditingController.text),
-        selectedCategory.value!,
+        CategoryRequest(
+          selectedCategory.value!.id,
+          selectedCategory.value!.name,
+        ),
         descriptionEditingController.text,
         imageEditingController.text,
       );
@@ -314,13 +336,14 @@ class ProductController extends GetxController {
         content: "Chỉnh sửa sản phẩm thành công",
         color: Colors.green,
       );
+      isLoading.value = false;
       await loadProductList(reset: true);
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Thất bại",
-        content: "Sửa sản phẩm thất bại",
+        content: e.toString().replaceAll("Exception: ", ""),
         color: Colors.red,
       );
     } finally {
@@ -329,30 +352,38 @@ class ProductController extends GetxController {
   }
 
   void addToCart(ProductResponse productResponse) async {
-    final cartRequest = CartRequest(
-      productResponse.id,
-      productResponse.name,
-      productResponse.code,
-      productResponse.price,
-      productResponse.stock,
-      productResponse.category,
-      productResponse.description,
-      productResponse.image,
-      1,
-    );
-    await _productRepository.addToCart(cartRequest);
-    countCartItem();
+    try {
+      final cartRequest = CartRequest(
+        productResponse.id,
+        productResponse.name,
+        productResponse.code,
+        productResponse.price,
+        productResponse.stock,
+        productResponse.category,
+        productResponse.description,
+        productResponse.image,
+        1,
+      );
+      await _cartRepository.addToCart(cartRequest);
+      countCartItem();
+    } on CartException catch (e) {
+      BaseSnackBar.showSnackBar(
+        title: "Lỗi",
+        content: e.toString().replaceAll("Exception", ""),
+        color: Colors.red,
+      );
+    }
   }
 
   void countCartItem() async {
-    countItem.value = await _productRepository.countCartItem();
+    countItem.value = await _cartRepository.countCartItem();
   }
 
   void logout() async {
     final authService = Get.find<AuthService>();
-    final cartService = Get.find<CartService>();
+
     await authService.clearToken();
-    await cartService.clearCart();
+    await _cartRepository.clearCart();
     BaseSnackBar.showSnackBar(
       title: "Thành công",
       content: "Bạn đã đăng xuất thành công",

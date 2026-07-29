@@ -2,6 +2,9 @@ import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/cart/bindings/cart_binding.dart';
 import 'package:prjgetxmvc/modules/cart/views/cart_page.dart';
+import 'package:prjgetxmvc/modules/category/bindings/category_binding.dart';
+import 'package:prjgetxmvc/modules/category/views/category_manager_page.dart';
+import 'package:prjgetxmvc/modules/category/views/add_category_page.dart';
 import 'package:prjgetxmvc/modules/login/bindings/login_binding.dart';
 import 'package:prjgetxmvc/modules/login/views/login_page.dart';
 import 'package:prjgetxmvc/modules/product/bindings/product_binding.dart';
@@ -35,6 +38,16 @@ class AppRoute {
       binding: ProductBinding(),
     ),
     GetPage(
+      name: AppPage.CATEGORY,
+      page: () => AddCategoryPage(),
+      binding: CategoryBinding(),
+    ),
+    GetPage(
+      name: AppPage.CATEGORY_MANAGER,
+      page: () => CategoryManagerPage(),
+      binding: CategoryBinding(),
+    ),
+    GetPage(
       name: AppPage.DETAIL_PRODUCT,
       page: () => DetailProductPage(),
       binding: ProductBinding(),
@@ -42,3 +55,5 @@ class AppRoute {
     GetPage(name: AppPage.CART, page: () => CartPage(), binding: CartBinding()),
   ];
 }
+
+//

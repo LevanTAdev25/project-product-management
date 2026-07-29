@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_handle_response.dart';
+import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/login/models/login_request.dart';
 import 'package:prjgetxmvc/modules/login/repositories/login_repository.dart';
 
+//
 class LoginController extends GetxController {
   final LoginRepository _loginRepository;
   final TextEditingController usernameController = TextEditingController();
@@ -14,7 +16,7 @@ class LoginController extends GetxController {
   final passwordFocusNode = FocusNode();
   final keyLoginForm = GlobalKey<FormState>();
   final isLoading = false.obs;
-  bool loginSuccess = false;
+  final isShowPassword = false.obs;
 
   LoginController(this._loginRepository);
   @override
@@ -26,6 +28,27 @@ class LoginController extends GetxController {
     super.onClose();
   }
 
+  void togglePasswordVisibility() {
+    isShowPassword.value = !isShowPassword.value;
+  }
+
+  void clearUsername() {
+    usernameController.clear();
+    usernameFocusNode.requestFocus();
+  }
+
+  void clearPassword() {
+    passwordController.clear();
+    passwordFocusNode.requestFocus();
+  }
+
+  void clearLoginForm() {
+    usernameController.clear();
+    passwordController.clear();
+    keyLoginForm.currentState?.reset();
+    usernameFocusNode.requestFocus();
+  }
+
   void login() async {
     isLoading.value = true;
     try {
@@ -34,21 +57,26 @@ class LoginController extends GetxController {
         passwordController.text,
       );
       await _loginRepository.login(loginRequest);
-      loginSuccess = true;
-      if (loginSuccess = true) {
-        Get.rawSnackbar(
-          title: "Đăng nhập thành công",
-          message: "Đăng nhập thành công",
-          backgroundColor: Colors.green,
-          borderColor: Colors.white,
-        );
-        Get.offAndToNamed(AppPage.PRODUCTS);
-        loginSuccess = false;
-      }
+
+      Get.rawSnackbar(
+        title: "Đăng nhập thành công",
+        message: "Đăng nhập thành công",
+        backgroundColor: Colors.green,
+        borderColor: Colors.white,
+      );
+      Get.offAndToNamed(AppPage.PRODUCTS);
     } on UnauthorizedException catch (e) {
-      BaseHandleResponse.handleExceptionResponse(e);
+      BaseSnackBar.showSnackBar(
+        title: "Thất bại",
+        content: e.toString().replaceAll("Exception: ", ""),
+        color: Colors.redAccent,
+      );
     } catch (e) {
-      BaseHandleResponse.handleExceptionResponse(e);
+      BaseSnackBar.showSnackBar(
+        title: "Lỗi",
+        content: e.toString().replaceAll("Exception: ", ""),
+        color: Colors.redAccent,
+      );
     } finally {
       isLoading.value = false;
     }

@@ -1,8 +1,9 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_response.dart';
-import 'package:prjgetxmvc/modules/product/models/category.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 part 'cart_request.g.dart';
 
+//
 @HiveType(typeId: 2)
 class CartRequest {
   @HiveField(0)
@@ -16,7 +17,7 @@ class CartRequest {
   @HiveField(4)
   final int stock;
   @HiveField(5)
-  final Category category;
+  final CategoryResponse category;
   @HiveField(6)
   final String description;
   @HiveField(7)

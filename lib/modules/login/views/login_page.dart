@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:prjgetxmvc/modules/login/controllers/login_controller.dart';
 part 'login_widget.dart';
 
+//
 class LoginPage extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {

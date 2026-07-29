@@ -3,6 +3,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
 
+//
 class DetailProductPage extends GetView<ProductController> {
   @override
   Widget build(BuildContext context) {

@@ -1,12 +1,13 @@
-import 'package:prjgetxmvc/modules/product/models/category.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 
+//
 class ProductResponse {
   final int id;
   final String name;
   final String code;
   final double price;
   final int stock;
-  final Category category;
+  final CategoryResponse category;
   final String description;
   final String image;
   ProductResponse(
@@ -19,16 +20,20 @@ class ProductResponse {
     this.description,
     this.image,
   );
-  static ProductResponse fromJson(Map<String, dynamic> json) {
-    return ProductResponse(
-      json['id'],
-      json['name'],
-      json['code'],
-      (json['price'] as num).toDouble(),
-      json['stock'],
-      Category.fromJson(json['category']),
-      json['description'],
-      json['image'],
-    );
+  factory ProductResponse.fromJson(Map<String, dynamic> json) {
+    try {
+      return ProductResponse(
+        json['id'] as int,
+        json['name'] as String,
+        json['code'] as String,
+        (json['price'] as num).toDouble(),
+        json['stock'] as int,
+        CategoryResponse.fromJson(json['category'] as Map<String, dynamic>),
+        json['description'] as String? ?? "",
+        json['image'] as String? ?? "",
+      );
+    } catch (e) {
+      throw const FormatException('ProductResponse parse failed');
+    }
   }
 }

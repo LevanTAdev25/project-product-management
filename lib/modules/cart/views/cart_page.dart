@@ -5,6 +5,7 @@ import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/modules/cart/controllers/cart_controller.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
 
+//
 class CartPage extends GetView<CartController> {
   @override
   Widget build(BuildContext context) {
@@ -82,7 +83,7 @@ class CartPage extends GetView<CartController> {
                         final productRequest = CartRequest.mapToCartRequest(
                           product,
                         );
-                        controller.decreaseCart(productRequest);
+                        controller.decreaseCart(productRequest.id);
                       },
                       icon: Icon(Icons.remove),
                     ),
@@ -94,7 +95,7 @@ class CartPage extends GetView<CartController> {
                         final productRequest = CartRequest.mapToCartRequest(
                           product,
                         );
-                        controller.increaseCart(productRequest);
+                        controller.increaseCart(productRequest.id);
                       },
                       icon: Icon(Icons.add),
                     ),

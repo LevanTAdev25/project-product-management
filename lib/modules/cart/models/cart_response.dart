@@ -1,6 +1,7 @@
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
 import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 
+//
 class CartResponse extends ProductResponse {
   final int quantity;
   CartResponse(

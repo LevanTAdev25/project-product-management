@@ -1,5 +1,6 @@
 part of 'product_page.dart';
 
+//
 extension BuildChipFilter on ProductPage {
   Widget _buildFilterChip({
     required String title,

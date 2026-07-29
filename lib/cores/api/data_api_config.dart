@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:prjgetxmvc/cores/interceptors/auth_request_interceptor.dart';
 
+//
 class DataApi {
   final Dio dio;
   static final DataApi _instance = DataApi._internal();
