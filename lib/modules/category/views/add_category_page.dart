@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
-import 'package:prjgetxmvc/modules/category/controllers/category_controller.dart';
+import 'package:prjgetxmvc/modules/category/controllers/form_category_controller.dart';
 
-class AddCategoryPage extends GetView<CategoryController> {
+class AddCategoryPage extends GetView<FormCategoryController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,15 +55,15 @@ class AddCategoryPage extends GetView<CategoryController> {
                           if (controller.keyCategoryForm.currentState
                                   ?.validate() ??
                               false) {
-                            Get.dialog(
+                            final result = await Get.dialog(
                               BaseDialog(
                                 title: "Xác nhận",
                                 content: "Bạn có muốn thêm danh mục này không",
-                                onPressYes: () async {
-                                  await controller.addCategory();
-                                },
                               ),
                             );
+                            if (result) {
+                              controller.addCategory();
+                            }
                           }
                         },
                   child: controller.isLoading.value

@@ -5,8 +5,12 @@ import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 
 class CategoryRepository {
   final BaseApi _baseApi = BaseApi();
-  Future<void> addCategory(CategoryRequest categoryRequest) async {
-    await _baseApi.post("/categories", data: {"name": categoryRequest.name});
+  Future<int> addCategory(CategoryRequest categoryRequest) async {
+    final response = await _baseApi.post(
+      "/categories",
+      data: categoryRequest.toJson(),
+    );
+    return (response.data["data"] as num?)?.toInt() ?? 0;
   }
 
   Future<List<CategoryResponse>> getCategoriesList() async {
@@ -19,7 +23,8 @@ class CategoryRepository {
         .toList();
   }
 
-  Future<void> deleteCategory(int id) async {
-    await _baseApi.delete("/categories/$id");
+  Future<bool> deleteCategory(int id) async {
+    final response = await _baseApi.delete("/categories/$id");
+    return response.data['data'] as bool? ?? false;
   }
 }

@@ -8,6 +8,7 @@ class BaseSnackBar {
     required String content,
     required Color color,
   }) {
+    if (Get.isSnackbarOpen) return;
     Get.snackbar(
       title,
       content,

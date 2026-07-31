@@ -22,6 +22,11 @@ class CartItemAlreadyExistsException extends CartException {
     : super('Sản phẩm đã tồn tại trong giỏ hàng');
 }
 
+class CartItemSelectedException extends CartException {
+  const CartItemSelectedException()
+    : super('Cần ít nhất một sản phẩm được chọn');
+}
+
 class CartStorageException extends CartException {
   const CartStorageException(super.message);
 }

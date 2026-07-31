@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
 import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:prjgetxmvc/cores/params/get_pagination_params.dart';
-import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/category/repositories/category_repository.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
@@ -18,8 +16,6 @@ class CategoryController extends GetxController {
   final ProductRepository _productRepository;
   final isLoading = false.obs;
   final isError = false.obs;
-  final nameCategoryTextEditingController = TextEditingController();
-  final keyCategoryForm = GlobalKey<FormState>();
   final errorMessage = RxnString();
   final categoriesList = <CategoryResponse>[].obs;
   CategoryController(this._categoryRepository, this._productRepository);
@@ -29,51 +25,8 @@ class CategoryController extends GetxController {
     initialize();
   }
 
-  @override
-  void onClose() {
-    nameCategoryTextEditingController.dispose();
-    super.onClose();
-  }
-
   void initialize() async {
     await getCategoriesList();
-  }
-
-  void clearTextController() {
-    nameCategoryTextEditingController.clear();
-  }
-
-  Future<void> addCategory() async {
-    if (isLoading.value) return;
-    isLoading.value = true;
-    isError.value = false;
-    errorMessage.value = null;
-    try {
-      final categoryRequest = CategoryRequest(
-        999,
-        nameCategoryTextEditingController.text,
-      );
-      await _categoryRepository.addCategory(categoryRequest);
-      await Get.find<ProductController>().loadCategoriesList();
-      Get.back();
-      BaseSnackBar.showSnackBar(
-        title: "Thành công",
-        content: "Bạn đã thêm danh mục thành công",
-        color: Colors.green,
-      );
-      isLoading.value = false;
-      await getCategoriesList();
-    } on UnauthorizedException {
-      BaseUnauthorized.handleUnauthorized();
-    } catch (e) {
-      BaseSnackBar.showSnackBar(
-        title: "Lỗi",
-        content: e.toString().replaceAll("Exception: ", ""),
-        color: Colors.redAccent,
-      );
-    } finally {
-      isLoading.value = false;
-    }
   }
 
   Future<void> getCategoriesList() async {
@@ -117,15 +70,22 @@ class CategoryController extends GetxController {
       if (productList.isNotEmpty) {
         throw CategoryInProductExistedException();
       }
-      await _categoryRepository.deleteCategory(categoryResponse.id);
-      BaseSnackBar.showSnackBar(
-        title: "Thành công",
-        content: "Xóa danh mục thành công",
-        color: Colors.green,
+      final response = await _categoryRepository.deleteCategory(
+        categoryResponse.id,
       );
-      isLoading.value = false;
-      await getCategoriesList();
-      await Get.find<ProductController>().loadCategoriesList();
+      if (response) {
+        await getCategoriesList();
+        BaseSnackBar.showSnackBar(
+          title: "Thành công",
+          content: "Xóa danh mục thành công",
+          color: Colors.green,
+        );
+        isLoading.value = false;
+
+        await Get.find<ProductController>().loadCategoriesList();
+      } else {
+        throw CategoryException("Không thể xóa danh mục");
+      }
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } on CategoryEmptyListException catch (e) {

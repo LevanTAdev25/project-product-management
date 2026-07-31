@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_response.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
+import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 part 'cart_request.g.dart';
 
 //
@@ -24,42 +25,58 @@ class CartRequest {
   final String image;
   @HiveField(8)
   final int quantity;
-  CartRequest(
-    this.id,
-    this.name,
-    this.code,
-    this.price,
-    this.stock,
-    this.category,
-    this.description,
-    this.image,
-    this.quantity,
-  );
+  CartRequest({
+    required this.id,
+    required this.name,
+    required this.code,
+    required this.price,
+    required this.stock,
+    required this.category,
+    required this.description,
+    required this.image,
+    required this.quantity,
+  });
   CartRequest copyWith({int? quantity}) {
     return CartRequest(
-      id,
-      name,
-      code,
-      price,
-      stock,
-      category,
-      description,
-      image,
-      quantity ?? this.quantity,
+      id: id,
+      name: name,
+      code: code,
+      price: price,
+      stock: stock,
+      category: category,
+      description: description,
+      image: image,
+      quantity: quantity ?? this.quantity,
     );
   }
 
-  static CartRequest mapToCartRequest(CartResponse cartResponse) {
+  factory CartRequest.mapToCartRequest(CartResponse cartResponse) {
     return CartRequest(
-      cartResponse.id,
-      cartResponse.name,
-      cartResponse.code,
-      cartResponse.price,
-      cartResponse.stock,
-      cartResponse.category,
-      cartResponse.description,
-      cartResponse.image,
-      cartResponse.quantity,
+      id: cartResponse.id,
+      name: cartResponse.name,
+      code: cartResponse.code,
+      price: cartResponse.price,
+      stock: cartResponse.stock,
+      category: cartResponse.category,
+      description: cartResponse.description,
+      image: cartResponse.image,
+      quantity: cartResponse.quantity,
+    );
+  }
+  factory CartRequest.mapToCartRequestWithProductResponse(
+    ProductResponse productResponse,
+    int quantity,
+  ) {
+    return CartRequest(
+      id: productResponse.id,
+      name: productResponse.name,
+      code: productResponse.code,
+      price: productResponse.price,
+      stock: productResponse.stock,
+      category: productResponse.category,
+      description: productResponse.description,
+      image: productResponse.image,
+      quantity: quantity,
     );
   }
 }

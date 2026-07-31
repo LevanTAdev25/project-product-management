@@ -51,16 +51,16 @@ class CategoryManagerPage extends GetView<CategoryController> {
             return ListTile(
               title: Text(category.name),
               trailing: IconButton(
-                onPressed: () {
-                  Get.dialog(
+                onPressed: () async {
+                  final result = await Get.dialog(
                     BaseDialog(
                       title: "Xác nhận",
                       content: "Bạn có muốn xóa danh mục này không?",
-                      onPressYes: () async {
-                        await controller.deleteCategory(category);
-                      },
                     ),
                   );
+                  if (result) {
+                    await controller.deleteCategory(category);
+                  }
                 },
                 icon: Icon(Icons.delete),
               ),
@@ -72,7 +72,6 @@ class CategoryManagerPage extends GetView<CategoryController> {
         key: const ValueKey("add_category"),
         child: Icon(Icons.add),
         onPressed: () {
-          controller.clearTextController();
           Get.toNamed(AppPage.CATEGORY);
         },
       ),

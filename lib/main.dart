@@ -4,8 +4,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:prjgetxmvc/cores/routes/page_route.dart';
 import 'package:prjgetxmvc/cores/services/auth_service.dart';
+import 'package:prjgetxmvc/modules/cart/controllers/cart_controller.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
-import 'package:prjgetxmvc/modules/cart/repositories/cart_repository.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 
 //
@@ -19,8 +19,8 @@ void main() async {
       () => AuthService().init(),
       permanent: true,
     );
-    await Get.putAsync<CartRepository>(
-      () => CartRepository().init(),
+    await Get.putAsync<CartController>(
+      () => CartController().init(),
       permanent: true,
     );
   } catch (e, stackTrace) {

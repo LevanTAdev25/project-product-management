@@ -53,18 +53,21 @@ class LoginController extends GetxController {
     isLoading.value = true;
     try {
       final loginRequest = LoginRequest(
-        usernameController.text,
-        passwordController.text,
+        username: usernameController.text,
+        password: passwordController.text,
       );
-      await _loginRepository.login(loginRequest);
-
-      Get.rawSnackbar(
-        title: "Đăng nhập thành công",
-        message: "Đăng nhập thành công",
-        backgroundColor: Colors.green,
-        borderColor: Colors.white,
-      );
-      Get.offAndToNamed(AppPage.PRODUCTS);
+      final token = await _loginRepository.login(loginRequest);
+      if (token.isNotEmpty) {
+        Get.rawSnackbar(
+          title: "Đăng nhập thành công",
+          message: "Đăng nhập thành công",
+          backgroundColor: Colors.green,
+          borderColor: Colors.white,
+        );
+        Get.offAndToNamed(AppPage.PRODUCTS);
+      } else {
+        throw Exception("Không thể đăng nhập");
+      }
     } on UnauthorizedException catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Thất bại",

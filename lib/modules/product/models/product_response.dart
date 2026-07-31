@@ -10,30 +10,32 @@ class ProductResponse {
   final CategoryResponse category;
   final String description;
   final String image;
-  ProductResponse(
-    this.id,
-    this.name,
-    this.code,
-    this.price,
-    this.stock,
-    this.category,
-    this.description,
-    this.image,
-  );
+  ProductResponse({
+    required this.id,
+    required this.name,
+    required this.code,
+    required this.price,
+    required this.stock,
+    required this.category,
+    required this.description,
+    required this.image,
+  });
   factory ProductResponse.fromJson(Map<String, dynamic> json) {
     try {
       return ProductResponse(
-        json['id'] as int,
-        json['name'] as String,
-        json['code'] as String,
-        (json['price'] as num).toDouble(),
-        json['stock'] as int,
-        CategoryResponse.fromJson(json['category'] as Map<String, dynamic>),
-        json['description'] as String? ?? "",
-        json['image'] as String? ?? "",
+        id: json['id'] as int? ?? 0,
+        name: json['name'] as String? ?? "",
+        code: json['code'] as String? ?? "",
+        price: (json['price'] as num?)?.toDouble() ?? 0.0,
+        stock: json['stock'] as int? ?? 0,
+        category: CategoryResponse.fromJson(
+          json['category'] as Map<String, dynamic>,
+        ),
+        description: json['description'] as String? ?? "",
+        image: json['image'] as String? ?? "",
       );
-    } catch (e) {
-      throw const FormatException('ProductResponse parse failed');
+    } on FormatException catch (e) {
+      throw FormatException("ProductResponse parse failed: $e");
     }
   }
 }

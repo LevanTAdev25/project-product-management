@@ -20,15 +20,15 @@ class ProductRequest {
     this.description,
     this.image,
   );
-  static Map<String, dynamic> toJson(ProductRequest productRequest) {
+  Map<String, dynamic> toJson() {
     return {
-      'name': productRequest.name,
-      'code': productRequest.code,
-      'price': productRequest.price,
-      'stock': productRequest.stock,
-      'category_id': productRequest.category.id,
-      'description': productRequest.description,
-      'image': productRequest.image,
+      'name': name,
+      'code': code,
+      'price': price,
+      'stock': stock,
+      'category_id': category.id,
+      'description': description,
+      'image': image,
     };
   }
 }
