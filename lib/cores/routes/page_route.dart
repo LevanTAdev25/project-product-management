@@ -3,11 +3,13 @@ import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/cart/bindings/cart_binding.dart';
 import 'package:prjgetxmvc/modules/cart/views/cart_page.dart';
 import 'package:prjgetxmvc/modules/category/bindings/category_binding.dart';
+import 'package:prjgetxmvc/modules/category/bindings/form_category_binding.dart';
 import 'package:prjgetxmvc/modules/category/views/category_manager_page.dart';
 import 'package:prjgetxmvc/modules/category/views/add_category_page.dart';
 import 'package:prjgetxmvc/modules/login/bindings/login_binding.dart';
 import 'package:prjgetxmvc/modules/login/views/login_page.dart';
 import 'package:prjgetxmvc/modules/product/bindings/product_binding.dart';
+import 'package:prjgetxmvc/modules/product/bindings/form_product_binding.dart';
 import 'package:prjgetxmvc/modules/product/views/detail_product_page.dart';
 import 'package:prjgetxmvc/modules/product/views/form_product_page.dart';
 import 'package:prjgetxmvc/modules/product/views/product_page.dart';
@@ -35,12 +37,12 @@ class AppRoute {
     GetPage(
       name: AppPage.FORM_PRODUCT,
       page: () => FormProductPage(),
-      binding: ProductBinding(),
+      binding: FormProductBinding(),
     ),
     GetPage(
       name: AppPage.CATEGORY,
       page: () => AddCategoryPage(),
-      binding: CategoryBinding(),
+      binding: FormCategoryBinding(),
     ),
     GetPage(
       name: AppPage.CATEGORY_MANAGER,

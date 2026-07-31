@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
-import 'package:prjgetxmvc/cores/base/base_form.dart';
-import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
+import 'package:prjgetxmvc/cores/base/base_product_form.dart';
+import 'package:prjgetxmvc/modules/product/controllers/form_product_controller.dart';
 
 //
-class FormProductPage extends GetView<ProductController> {
+class FormProductPage extends GetView<FormProductController> {
   @override
   Widget build(BuildContext context) {
     final isEditProduct = Get.arguments['isEdit'];
@@ -14,7 +14,6 @@ class FormProductPage extends GetView<ProductController> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            controller.selectedCategory.value = null;
             Get.back();
           },
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -61,28 +60,28 @@ class FormProductPage extends GetView<ProductController> {
                     : isEditProduct == false
                     ? () async {
                         if (controller.addKeyForm.currentState!.validate()) {
-                          Get.dialog(
+                          final result = await Get.dialog(
                             BaseDialog(
                               title: "Xác nhận thêm",
                               content: "Bạn có muốn thêm sản phẩm này không?",
-                              onPressYes: () async {
-                                await controller.addProduct();
-                              },
                             ),
                           );
+                          if (result) {
+                            await controller.addProduct();
+                          }
                         }
                       }
                     : () async {
                         if (controller.addKeyForm.currentState!.validate()) {
-                          Get.dialog(
+                          final result = await Get.dialog<bool>(
                             BaseDialog(
                               title: "Xác nhận sửa",
                               content: "Bạn có muốn sửa sản phẩm này không?",
-                              onPressYes: () async {
-                                await controller.updateProduct();
-                              },
                             ),
                           );
+                          if (result == true) {
+                            await controller.updateProduct();
+                          }
                         }
                       },
                 child: isEditProduct == false

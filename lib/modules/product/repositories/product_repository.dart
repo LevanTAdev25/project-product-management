@@ -35,17 +35,23 @@ class ProductRepository {
     return listCategory;
   }
 
-  Future<void> addProduct(ProductRequest productRequest) async {
-    final productJson = ProductRequest.toJson(productRequest);
-    await _baseApi.post("/products", data: productJson);
+  Future<int> addProduct(ProductRequest productRequest) async {
+    final productJson = productRequest.toJson();
+    final response = await _baseApi.post("/products", data: productJson);
+    return (response.data["data"] as num?)?.toInt() ?? 0;
   }
 
-  Future<void> removeProduct(int id) async {
-    await _baseApi.delete("/products/${id}");
+  Future<bool> removeProduct(int id) async {
+    final response = await _baseApi.delete("/products/${id}");
+    return response.data["data"] as bool? ?? false;
   }
 
-  Future<void> updateProduct(ProductRequest productRequest) async {
-    final productJson = ProductRequest.toJson(productRequest);
-    await _baseApi.put("/products/${productRequest.id}", data: productJson);
+  Future<bool> updateProduct(ProductRequest productRequest) async {
+    final productJson = productRequest.toJson();
+    final response = await _baseApi.put(
+      "/products/${productRequest.id}",
+      data: productJson,
+    );
+    return response.data["data"] as bool? ?? false;
   }
 }

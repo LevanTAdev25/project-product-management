@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
-import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
+import 'package:prjgetxmvc/modules/product/controllers/form_product_controller.dart';
 
 //
-class BaseForm extends GetView<ProductController> {
+class BaseForm extends GetView<FormProductController> {
   final bool baseFormState;
   BaseForm({super.key, required this.baseFormState});
   @override
@@ -155,18 +155,12 @@ class BaseForm extends GetView<ProductController> {
       );
     }
 
-    // Đảm bảo selectedCategory.value hợp lệ trong danh sách
-    final currentValue =
-        controller.categoriesList.contains(controller.selectedCategory.value)
-        ? controller.selectedCategory.value
-        : controller.categoriesList.first;
-
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.white,
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<CategoryResponse>(
-          value: currentValue,
+        child: DropdownButtonFormField<CategoryResponse>(
+          initialValue: controller.selectedCategory.value,
           isExpanded: true,
           items: controller.categoriesList.map((category) {
             return DropdownMenuItem<CategoryResponse>(
@@ -174,6 +168,14 @@ class BaseForm extends GetView<ProductController> {
               child: Text(category.name),
             );
           }).toList(),
+          hint: const Text("Chọn danh mục"),
+          validator: (value) {
+            if (value == null) {
+              return "Vui lòng chọn danh mục";
+            }
+
+            return null;
+          },
           onChanged: baseFormState
               ? null
               : (value) {

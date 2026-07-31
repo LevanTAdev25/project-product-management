@@ -8,9 +8,16 @@ class CategoryResponse {
   int id;
   @HiveField(1)
   String name;
-  CategoryResponse(this.id, this.name);
+  CategoryResponse({required this.id, required this.name});
   factory CategoryResponse.fromJson(Map<String, dynamic> json) {
-    return CategoryResponse(json['id'], json['name']);
+    try {
+      return CategoryResponse(
+        id: json['id'] as int? ?? 0,
+        name: json['name'] as String? ?? "",
+      );
+    } on FormatException catch (e) {
+      throw FormatException("Parse failed: $e");
+    }
   }
 
   @override

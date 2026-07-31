@@ -18,7 +18,7 @@ class CartPage extends GetView<CartController> {
           icon: Icon(Icons.arrow_back, color: Colors.white),
         ),
         title: const Text(
-          "Sản phẩm trong giỏ hàng",
+          "Giỏ hàng",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -26,6 +26,23 @@ class CartPage extends GetView<CartController> {
             fontSize: 22,
           ),
         ),
+        actions: [
+          Obx(() {
+            if (controller.cartList.isEmpty) {
+              return SizedBox.shrink();
+            }
+            return TextButton(
+              onPressed: controller.toggleEditMode,
+              child: Text(
+                controller.isEditMode.value ? "Xong" : "Sửa",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }),
+        ],
         backgroundColor: Colors.black,
       ),
       body: Obx(() {
@@ -46,84 +63,146 @@ class CartPage extends GetView<CartController> {
         return ListView.builder(
           itemCount: controller.cartList.length,
           itemBuilder: (context, index) {
-            final product = controller.cartList.value[index];
-            return Card(
-              elevation: 4,
-              shadowColor: Colors.grey.withOpacity(0.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-                side: BorderSide(color: Colors.green),
-              ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  child: Image.network(
-                    product.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset("assets/images/logo.png");
-                    },
-                  ),
-                ),
-                title: Text(
-                  product.name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  "${controller.priceFormatter.format(product.price * product.quantity)}đ",
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        final productRequest = CartRequest.mapToCartRequest(
-                          product,
-                        );
-                        controller.decreaseCart(productRequest.id);
-                      },
-                      icon: Icon(Icons.remove),
-                    ),
+            final product = controller.cartList[index];
 
-                    Text("${product.quantity}"),
-
-                    IconButton(
-                      onPressed: () {
-                        final productRequest = CartRequest.mapToCartRequest(
-                          product,
-                        );
-                        controller.increaseCart(productRequest.id);
-                      },
-                      icon: Icon(Icons.add),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        Get.dialog(
-                          BaseDialog(
-                            title: "Xác nhận",
-                            content:
-                                "Bạn có muốn xóa sản phẩm này ra khỏi giỏ hàng không?",
-                            onPressYes: () {
-                              controller.removeCart(product.id);
+            return Obx(() {
+              final isEditMode = controller.isEditMode.value;
+              final isSelected = controller.selectedProductIds.contains(
+                product.id,
+              );
+              return Card(
+                elevation: 4,
+                shadowColor: Colors.grey.withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  side: BorderSide(color: Colors.green),
+                ),
+                child: ListTile(
+                  onTap: isEditMode
+                      ? () {
+                          controller.toggleProductSelection(product.id);
+                        }
+                      : null,
+                  leading: isEditMode
+                      ? Checkbox(
+                          value: isSelected,
+                          onChanged: (_) {
+                            controller.toggleProductSelection(product.id);
+                          },
+                        )
+                      : CircleAvatar(
+                          child: Image.network(
+                            product.image,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset("assets/images/logo.png");
                             },
                           ),
-                        );
-                      },
-                      icon: Icon(Icons.delete),
+                        ),
+                  title: Text(
+                    product.name,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    "${controller.priceFormatter.format(product.price * product.quantity)}đ",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
+                  trailing: isEditMode
+                      ? null
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () async {
+                                final productRequest =
+                                    CartRequest.mapToCartRequest(product);
+                                await controller.decreaseCart(
+                                  productRequest.id,
+                                );
+                              },
+                              icon: Icon(Icons.remove),
+                            ),
+
+                            Text("${product.quantity}"),
+
+                            IconButton(
+                              onPressed: () async {
+                                final productRequest =
+                                    CartRequest.mapToCartRequest(product);
+                                await controller.increaseCart(
+                                  productRequest.id,
+                                );
+                              },
+                              icon: Icon(Icons.add),
+                            ),
+                          ],
+                        ),
                 ),
-              ),
-            );
+              );
+            });
           },
         );
       }),
       bottomNavigationBar: Obx(() {
         if (controller.cartList.isEmpty) {
           return const SizedBox.shrink();
+        }
+        if (controller.isEditMode.value) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              boxShadow: [BoxShadow(blurRadius: 8, color: Colors.black12)],
+            ),
+            child: SafeArea(
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: controller.isAllSelected,
+                    onChanged: (_) {
+                      controller.toggleSelectAll();
+                    },
+                  ),
+                  InkWell(
+                    onTap: controller.toggleSelectAll,
+                    child: const Text(
+                      "Chọn tất cả",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const Spacer(),
+                  ElevatedButton.icon(
+                    onPressed: controller.selectedProductIds.isEmpty
+                        ? null
+                        : () async {
+                            final selectedCount =
+                                controller.selectedProductIds.length;
+
+                            final result = await Get.dialog<bool>(
+                              BaseDialog(
+                                title: "Xác nhận",
+                                content:
+                                    "Bạn có muốn xóa $selectedCount sản phẩm đã chọn không?",
+                              ),
+                              barrierDismissible: false,
+                            );
+
+                            if (result == true) {
+                              await controller.removeSelectedProducts();
+                            }
+                          },
+                    icon: const Icon(Icons.delete),
+                    label: Text(
+                      "Xóa (${controller.selectedProductIds.length})",
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
         return Container(
           padding: const EdgeInsets.all(16),
