@@ -19,32 +19,22 @@ class FormProductPage extends GetView<FormProductController> {
           icon: Icon(Icons.arrow_back, color: Colors.white),
         ),
         backgroundColor: Colors.black,
-        title: isEditProduct
-            ? const Text(
-                "Sửa thông tin sản phẩm",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  fontSize: 22,
-                ),
-              )
-            : const Text(
-                "Thêm thông tin sản phẩm",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  fontSize: 22,
-                ),
-              ),
+        title: Text(
+          isEditProduct ? "Sửa thông tin sản phẩm" : "Thêm thông tin sản phẩm",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+            fontSize: 22,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Obx(() {
           return Column(
             children: [
               Form(
-                key: controller.addKeyForm,
+                key: controller.keyForm,
                 child: BaseForm(baseFormState: controller.isLoading.value),
               ),
 
@@ -59,40 +49,15 @@ class FormProductPage extends GetView<FormProductController> {
                     ? null
                     : isEditProduct == false
                     ? () async {
-                        if (controller.addKeyForm.currentState!.validate()) {
-                          final result = await Get.dialog(
-                            BaseDialog(
-                              title: "Xác nhận thêm",
-                              content: "Bạn có muốn thêm sản phẩm này không?",
-                            ),
-                          );
-                          if (result) {
-                            await controller.addProduct();
-                          }
-                        }
+                        await controller.addProduct();
                       }
                     : () async {
-                        if (controller.addKeyForm.currentState!.validate()) {
-                          final result = await Get.dialog<bool>(
-                            BaseDialog(
-                              title: "Xác nhận sửa",
-                              content: "Bạn có muốn sửa sản phẩm này không?",
-                            ),
-                          );
-                          if (result == true) {
-                            await controller.updateProduct();
-                          }
-                        }
+                        await controller.updateProduct();
                       },
-                child: isEditProduct == false
-                    ? const Text(
-                        "Thêm sản phẩm",
-                        style: TextStyle(color: Colors.white),
-                      )
-                    : const Text(
-                        "Sửa sản phẩm",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                child: Text(
+                  isEditProduct == false ? "Thêm sản phẩm" : "Sửa sản phẩm",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           );

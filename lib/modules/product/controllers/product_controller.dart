@@ -8,13 +8,13 @@ import 'package:prjgetxmvc/cores/exceptions/cart_exception.dart';
 import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
 import 'package:prjgetxmvc/cores/exceptions/product_exception.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
-import 'package:prjgetxmvc/cores/params/get_pagination_params.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/cores/services/auth_service.dart';
-import 'package:prjgetxmvc/modules/cart/controllers/cart_controller.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
-
+import 'package:prjgetxmvc/modules/category/models/category_request.dart';
+import 'package:prjgetxmvc/modules/cart/models/cart_response.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
+import 'package:prjgetxmvc/modules/product/models/product_request.dart';
 
 import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 import 'package:prjgetxmvc/modules/product/repositories/product_repository.dart';
@@ -22,7 +22,7 @@ import 'package:prjgetxmvc/modules/product/repositories/product_repository.dart'
 //
 class ProductController extends GetxController {
   final ProductRepository _productRepository;
-
+  final Box<CartRequest> _cartBox;
   final refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   final isLoading = false.obs;
@@ -36,6 +36,7 @@ class ProductController extends GetxController {
   final countItem = 0.obs;
   final quantity = 1.obs;
   final formatter = NumberFormat("#,##0", "vi_VN");
+  List<CartResponse> cartList = [];
 
   ProductResponse? intentProduct;
 
@@ -47,12 +48,13 @@ class ProductController extends GetxController {
   final ScrollController scrollController = ScrollController();
   final SearchController searchController = SearchController();
 
-  ProductController(this._productRepository);
+  ProductController(this._productRepository, this._cartBox);
   @override
   void onInit() {
     super.onInit();
     _initialize();
     countCartItem();
+    getCartList();
     scrollController.addListener(_onScroll);
   }
 
@@ -117,10 +119,10 @@ class ProductController extends GetxController {
         selectedCategory.value = null;
       }
       final tempProductList = await _productRepository.getProductList(
-        GetPaginationParams(
+        ProductRequest.query(
           page: _page,
           limit: _limit,
-          category: selectedCategory.value,
+          category: CategoryRequest.mapToCartRequest(selectedCategory.value),
         ),
       );
       if (tempProductList.isEmpty) {
@@ -171,10 +173,12 @@ class ProductController extends GetxController {
       final nextPage = _page + 1;
       final List<ProductResponse> newProductList = await _productRepository
           .getProductList(
-            GetPaginationParams(
+            ProductRequest.query(
               page: nextPage,
               limit: _limit,
-              category: selectedCategory.value,
+              category: CategoryRequest.mapToCartRequest(
+                selectedCategory.value,
+              ),
             ),
           );
       if (newProductList.isEmpty) {
@@ -243,7 +247,36 @@ class ProductController extends GetxController {
         productResponse,
         quantity,
       );
-      await Get.find<CartController>().addToCart(cartRequest);
+      if (cartRequest.id <= 0) {
+        throw const CartException('ID sản phẩm không hợp lệ');
+      }
+
+      if (cartRequest.stock <= 0) {
+        throw const CartOutOfStockException();
+      }
+
+      if (cartRequest.quantity <= 0) {
+        throw const CartException('Số lượng sản phẩm phải lớn hơn 0');
+      }
+      final currentCart = _cartBox.get(cartRequest.id);
+      if (currentCart != null) {
+        final newQuantity = currentCart.quantity + cartRequest.quantity;
+        if (newQuantity > currentCart.stock) {
+          throw CartOutOfStockException();
+        }
+        await _cartBox.put(
+          currentCart.id,
+          cartRequest.copyWith(quantity: newQuantity),
+        );
+
+        int index = cartList.indexWhere((e) => e.id == currentCart.id);
+        cartList[index] = CartResponse.mapToCartResponse(
+          cartRequest.copyWith(quantity: newQuantity),
+        );
+        return true;
+      }
+      await _cartBox.put(cartRequest.id, cartRequest);
+      cartList.add(CartResponse.mapToCartResponse(cartRequest));
       await countCartItem();
       return true;
     } on CartException catch (e) {
@@ -256,19 +289,48 @@ class ProductController extends GetxController {
     }
   }
 
+  void getCartList() {
+    try {
+      final cartListFromLocal = _cartBox.values
+          .map((value) => CartResponse.mapToCartResponse(value))
+          .toList(growable: false);
+
+      cartList.assignAll(cartListFromLocal);
+    } on CartException catch (e) {
+      cartList.clear();
+
+      BaseSnackBar.showSnackBar(
+        title: 'Lỗi giỏ hàng',
+        content: e.message,
+        color: Colors.red,
+      );
+    } catch (e, stackTrace) {
+      cartList.clear();
+
+      debugPrint('Lỗi đọc giỏ hàng: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      BaseSnackBar.showSnackBar(
+        title: 'Lỗi',
+        content: 'Không thể tải danh sách giỏ hàng',
+        color: Colors.red,
+      );
+    }
+  }
+
   Future<void> countCartItem() async {
-    countItem.value = await Get.find<CartController>().countCartItem();
+    countItem.value = await _cartBox.length;
   }
 
   int getQuantity(int id) {
     try {
-      final listCart = Get.find<CartController>().getCartList();
-      if (listCart.isEmpty) {
+      final temptCartList = cartList;
+      if (temptCartList.isEmpty) {
         throw CartItemNotFoundException();
       }
-      final index = listCart.indexWhere((cart) => cart.id == id);
+      final index = temptCartList.indexWhere((cart) => cart.id == id);
       if (index != -1) {
-        return listCart[index].quantity;
+        return temptCartList[index].quantity;
       }
       return 0;
     } on CartItemNotFoundException {
@@ -280,7 +342,7 @@ class ProductController extends GetxController {
     final authService = Get.find<AuthService>();
 
     await authService.clearToken();
-    await Get.find<CartController>().clearCart();
+    await _cartBox.clear();
     BaseSnackBar.showSnackBar(
       title: "Thành công",
       content: "Bạn đã đăng xuất thành công",

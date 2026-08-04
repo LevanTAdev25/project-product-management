@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/exceptions/exceptions.dart';
+import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
 import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
 import 'package:prjgetxmvc/modules/category/controllers/category_controller.dart';
 import 'package:prjgetxmvc/modules/category/models/category_request.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/category/repositories/category_repository.dart';
-import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
 
 class FormCategoryController extends GetxController {
   final CategoryRepository _categoryRepository;
@@ -16,7 +17,14 @@ class FormCategoryController extends GetxController {
   final isLoading = false.obs;
   final isError = false.obs;
   final errorMessage = RxnString();
+  late List<CategoryResponse> categoryList;
   FormCategoryController(this._categoryRepository);
+  @override
+  void onInit() {
+    super.onInit();
+    categoryList = Get.arguments["category_list"];
+  }
+
   @override
   void onReady() {
     super.onReady();
@@ -35,27 +43,42 @@ class FormCategoryController extends GetxController {
 
   Future<void> addCategory() async {
     if (isLoading.value) return;
-    isLoading.value = true;
     isError.value = false;
     errorMessage.value = null;
     try {
       final categoryRequest = CategoryRequest(
-        999,
-        nameCategoryTextEditingController.text,
+        id: 999,
+        name: nameCategoryTextEditingController.text,
       );
-      final response = await _categoryRepository.addCategory(categoryRequest);
-      if (response != 0) {
-        await Get.find<ProductController>().loadCategoriesList();
-        Get.back();
-        BaseSnackBar.showSnackBar(
-          title: "Thành công",
-          content: "Bạn đã thêm danh mục thành công",
-          color: Colors.green,
+      if (keyCategoryForm.currentState?.validate() ?? false) {
+        final result = await Get.dialog(
+          BaseDialog(
+            title: "Xác nhận",
+            content: "Bạn có muốn thêm danh mục này không",
+          ),
         );
-        isLoading.value = false;
-        await Get.find<CategoryController>().getCategoriesList();
-      } else {
-        throw CategoryException("Không thể thêm danh mục");
+        if (result != true) {
+          return;
+        }
+        isLoading.value = true;
+
+        final response = await _categoryRepository.addCategory(categoryRequest);
+        if (response != 0) {
+          categoryList.add(
+            CategoryResponse.mapToCategoryResponse(
+              categoryRequest.copyWith(id: response),
+            ),
+          );
+          Get.back(result: categoryList.toList());
+          BaseSnackBar.showSnackBar(
+            title: "Thành công",
+            content: "Bạn đã thêm danh mục thành công",
+            color: Colors.green,
+          );
+          isLoading.value = false;
+        } else {
+          throw CategoryException("Không thể thêm danh mục");
+        }
       }
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();

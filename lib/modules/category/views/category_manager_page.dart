@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
-import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/category/controllers/category_controller.dart';
+import 'package:prjgetxmvc/modules/category/models/category_request.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 
 class CategoryManagerPage extends GetView<CategoryController> {
   @override
@@ -12,7 +13,7 @@ class CategoryManagerPage extends GetView<CategoryController> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Get.back();
+            Get.back(result: controller.categoriesList);
           },
           icon: Icon(Icons.arrow_back, color: Colors.white),
         ),
@@ -52,15 +53,9 @@ class CategoryManagerPage extends GetView<CategoryController> {
               title: Text(category.name),
               trailing: IconButton(
                 onPressed: () async {
-                  final result = await Get.dialog(
-                    BaseDialog(
-                      title: "Xác nhận",
-                      content: "Bạn có muốn xóa danh mục này không?",
-                    ),
+                  await controller.deleteCategory(
+                    CategoryRequest.mapToCartRequest(category),
                   );
-                  if (result) {
-                    await controller.deleteCategory(category);
-                  }
                 },
                 icon: Icon(Icons.delete),
               ),
@@ -71,8 +66,15 @@ class CategoryManagerPage extends GetView<CategoryController> {
       floatingActionButton: FloatingActionButton(
         key: const ValueKey("add_category"),
         child: Icon(Icons.add),
-        onPressed: () {
-          Get.toNamed(AppPage.CATEGORY);
+        onPressed: () async {
+          final result = await Get.toNamed(
+            AppPage.CATEGORY,
+            arguments: {"category_list": controller.categoriesList.toList()},
+          );
+          if (result == null) {
+            return;
+          }
+          controller.categoriesList.assignAll(result);
         },
       ),
     );

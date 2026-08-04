@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 part 'category_response.g.dart';
 
 //
@@ -19,7 +20,11 @@ class CategoryResponse {
       throw FormatException("Parse failed: $e");
     }
   }
-
+  factory CategoryResponse.mapToCategoryResponse(
+    CategoryRequest categoryRequest,
+  ) {
+    return CategoryResponse(id: categoryRequest.id, name: categoryRequest.name);
+  }
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

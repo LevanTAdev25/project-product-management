@@ -1,6 +1,5 @@
 import 'package:prjgetxmvc/cores/base/base_api.dart';
 
-import 'package:prjgetxmvc/cores/params/get_pagination_params.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/product/models/product_request.dart';
 import 'package:prjgetxmvc/modules/product/models/product_response.dart';
@@ -9,13 +8,13 @@ import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 class ProductRepository {
   final BaseApi _baseApi = BaseApi();
   Future<List<ProductResponse>> getProductList(
-    GetPaginationParams getPaginationParams,
+    ProductRequest productRequest,
   ) async {
-    final page = getPaginationParams.page;
-    final limit = getPaginationParams.limit;
+    final page = productRequest.page;
+    final limit = productRequest.limit;
     final query = {'page': page, 'limit': limit};
-    if (getPaginationParams.category != null) {
-      query['category_id'] = getPaginationParams.category!.id;
+    if (productRequest.category!.id != 0) {
+      query['category_id'] = productRequest.category!.id;
     }
     final response = await _baseApi.get("/products", query: query);
 
