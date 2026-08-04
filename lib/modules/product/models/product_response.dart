@@ -29,7 +29,8 @@ class ProductResponse {
         price: (json['price'] as num?)?.toDouble() ?? 0.0,
         stock: json['stock'] as int? ?? 0,
         category: CategoryResponse.fromJson(
-          json['category'] as Map<String, dynamic>,
+          (json['category'] as Map<String, dynamic>?) ??
+              {"id": null, "name": null},
         ),
         description: json['description'] as String? ?? "",
         image: json['image'] as String? ?? "",

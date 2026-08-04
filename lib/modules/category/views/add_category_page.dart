@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
-import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/modules/category/controllers/form_category_controller.dart';
 
 class AddCategoryPage extends GetView<FormCategoryController> {
@@ -52,19 +51,7 @@ class AddCategoryPage extends GetView<FormCategoryController> {
                   onPressed: controller.isLoading.value
                       ? null
                       : () async {
-                          if (controller.keyCategoryForm.currentState
-                                  ?.validate() ??
-                              false) {
-                            final result = await Get.dialog(
-                              BaseDialog(
-                                title: "Xác nhận",
-                                content: "Bạn có muốn thêm danh mục này không",
-                              ),
-                            );
-                            if (result) {
-                              controller.addCategory();
-                            }
-                          }
+                          await controller.addCategory();
                         },
                   child: controller.isLoading.value
                       ? SizedBox(

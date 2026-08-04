@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
 import 'package:prjgetxmvc/cores/exceptions/product_exception.dart';
@@ -13,7 +14,7 @@ import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 
 class FormProductController extends GetxController {
   final ProductRepository _productRepository;
-  final addKeyForm = GlobalKey<FormState>();
+  final keyForm = GlobalKey<FormState>();
   final updateKeyForm = GlobalKey<FormState>();
   final isLoading = false.obs;
   final isError = false.obs;
@@ -88,35 +89,43 @@ class FormProductController extends GetxController {
 
   Future<void> addProduct() async {
     if (isLoading.value) return;
-    isLoading.value = true;
     isError.value = false;
     errorMessage.value = null;
     try {
-      final product = ProductRequest(
-        999,
-        nameEditingController.text,
-        codeEditingController.text,
-        double.parse(priceEditingController.text),
-        int.parse(stockEditingController.text),
-        CategoryRequest(
-          selectedCategory.value!.id,
-          selectedCategory.value!.name,
-        ),
-        descriptionEditingController.text,
-        imageEditingController.text,
-      );
-      final response = await _productRepository.addProduct(product);
-      if (response != 0) {
-        Get.back();
-        BaseSnackBar.showSnackBar(
-          title: "Thành công",
-          content: "Thêm sản phẩm thành công",
-          color: Colors.green,
+      if (keyForm.currentState!.validate()) {
+        final result = await Get.dialog(
+          BaseDialog(
+            title: "Xác nhận thêm",
+            content: "Bạn có muốn thêm sản phẩm này không?",
+          ),
         );
-        isLoading.value = false;
-        await Get.find<ProductController>().loadProductList(reset: true);
-      } else {
-        throw ProductException("Không thể thêm sản phẩm");
+        if (result != true) {
+          return;
+        }
+        isLoading.value = true;
+        final product = ProductRequest.create(
+          id: 999,
+          name: nameEditingController.text,
+          code: codeEditingController.text,
+          price: double.parse(priceEditingController.text),
+          stock: int.parse(stockEditingController.text),
+          category: CategoryRequest.mapToCartRequest(selectedCategory.value),
+          description: descriptionEditingController.text,
+          image: imageEditingController.text,
+        );
+        final response = await _productRepository.addProduct(product);
+        if (response != 0) {
+          Get.back();
+          BaseSnackBar.showSnackBar(
+            title: "Thành công",
+            content: "Thêm sản phẩm thành công",
+            color: Colors.green,
+          );
+          isLoading.value = false;
+          await Get.find<ProductController>().loadProductList(reset: true);
+        } else {
+          throw ProductException("Không thể thêm sản phẩm");
+        }
       }
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
@@ -133,35 +142,43 @@ class FormProductController extends GetxController {
 
   Future<void> updateProduct() async {
     if (isLoading.value) return;
-    isLoading.value = true;
     isError.value = false;
     errorMessage.value = null;
     try {
-      final productRequest = ProductRequest(
-        idProduct!,
-        nameEditingController.text,
-        codeEditingController.text,
-        double.parse(priceEditingController.text),
-        int.parse(stockEditingController.text),
-        CategoryRequest(
-          selectedCategory.value!.id,
-          selectedCategory.value!.name,
-        ),
-        descriptionEditingController.text,
-        imageEditingController.text,
-      );
-      final response = await _productRepository.updateProduct(productRequest);
-      if (response) {
-        Get.back();
-        BaseSnackBar.showSnackBar(
-          title: "Thành công",
-          content: "Chỉnh sửa sản phẩm thành công",
-          color: Colors.green,
+      if (keyForm.currentState!.validate()) {
+        final result = await Get.dialog<bool>(
+          BaseDialog(
+            title: "Xác nhận sửa",
+            content: "Bạn có muốn sửa sản phẩm này không?",
+          ),
         );
-        isLoading.value = false;
-        await Get.find<ProductController>().loadProductList(reset: true);
-      } else {
-        throw ProductException("Không thể cập nhật sản phẩm");
+        if (result != true) {
+          return;
+        }
+        isLoading.value = true;
+        final productRequest = ProductRequest.create(
+          id: idProduct!,
+          name: nameEditingController.text,
+          code: codeEditingController.text,
+          price: double.parse(priceEditingController.text),
+          stock: int.parse(stockEditingController.text),
+          category: CategoryRequest.mapToCartRequest(selectedCategory.value),
+          description: descriptionEditingController.text,
+          image: imageEditingController.text,
+        );
+        final response = await _productRepository.updateProduct(productRequest);
+        if (response) {
+          Get.back();
+          BaseSnackBar.showSnackBar(
+            title: "Thành công",
+            content: "Chỉnh sửa sản phẩm thành công",
+            color: Colors.green,
+          );
+          isLoading.value = false;
+          await Get.find<ProductController>().loadProductList(reset: true);
+        } else {
+          throw ProductException("Không thể cập nhật sản phẩm");
+        }
       }
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
