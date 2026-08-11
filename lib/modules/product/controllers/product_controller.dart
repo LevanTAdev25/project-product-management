@@ -27,8 +27,7 @@ class ProductController extends GetxController {
 
   final isLoading = false.obs;
   final isError = false.obs;
-
-  final productList = <ProductResponse>[];
+  final originalList = <ProductResponse>[];
   final categoriesList = <CategoryResponse>[].obs;
   final selectedCategory = Rx<CategoryResponse?>(null);
   final errorMessage = RxnString();
@@ -79,16 +78,19 @@ class ProductController extends GetxController {
   }
 
   void applyFilter() async {
-    Iterable<ProductResponse> result = productList;
-
+    List<ProductResponse> result = displayedProducts;
     if (searchController.text.isNotEmpty) {
-      result = result.where(
-        (product) => product.name.toLowerCase().contains(
-          searchController.text.toLowerCase(),
-        ),
-      );
+      result = originalList
+          .where(
+            (product) => product.name.toLowerCase().contains(
+              searchController.text.toLowerCase(),
+            ),
+          )
+          .toList();
+      displayedProducts.assignAll(result);
+    } else {
+      displayedProducts.assignAll(originalList);
     }
-    displayedProducts.assignAll(result);
   }
 
   void searchProduct(String _) {
@@ -115,6 +117,7 @@ class ProductController extends GetxController {
       _page = 1;
       _hasMore = true;
       isLoadingMore.value = false;
+      searchController.clear();
       if (reset) {
         selectedCategory.value = null;
       }
@@ -122,15 +125,18 @@ class ProductController extends GetxController {
         ProductRequest.query(
           page: _page,
           limit: _limit,
-          category: CategoryRequest.mapToCartRequest(selectedCategory.value),
+          category: CategoryRequest.mapToCategoryRequest(
+            selectedCategory.value,
+          ),
         ),
       );
       if (tempProductList.isEmpty) {
         throw ProductEmptyException();
       }
-      productList.assignAll(tempProductList);
-      displayedProducts.assignAll(productList);
-      if (productList.length < _limit) {
+      originalList.assignAll(tempProductList);
+      displayedProducts.assignAll(tempProductList);
+
+      if (displayedProducts.length < _limit) {
         _hasMore = false;
       }
     } on UnauthorizedException {
@@ -176,7 +182,7 @@ class ProductController extends GetxController {
             ProductRequest.query(
               page: nextPage,
               limit: _limit,
-              category: CategoryRequest.mapToCartRequest(
+              category: CategoryRequest.mapToCategoryRequest(
                 selectedCategory.value,
               ),
             ),
@@ -184,8 +190,7 @@ class ProductController extends GetxController {
       if (newProductList.isEmpty) {
         _hasMore = false;
       } else {
-        productList.addAll(newProductList);
-        applyFilter();
+        displayedProducts.addAll(newProductList);
         _page++;
         if (newProductList.length < _limit) {
           _hasMore = false;
@@ -220,6 +225,7 @@ class ProductController extends GetxController {
           await cartBox.delete(id);
         }
         countCartItem();
+        cartList.removeWhere((e) => e.id == id);
         isLoading.value = false;
         await loadProductList(reset: true);
       } else {
@@ -247,17 +253,6 @@ class ProductController extends GetxController {
         productResponse,
         quantity,
       );
-      if (cartRequest.id <= 0) {
-        throw const CartException('ID sản phẩm không hợp lệ');
-      }
-
-      if (cartRequest.stock <= 0) {
-        throw const CartOutOfStockException();
-      }
-
-      if (cartRequest.quantity <= 0) {
-        throw const CartException('Số lượng sản phẩm phải lớn hơn 0');
-      }
       final currentCart = _cartBox.get(cartRequest.id);
       if (currentCart != null) {
         final newQuantity = currentCart.quantity + cartRequest.quantity;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:prjgetxmvc/cores/arguments/cart_argument.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/exceptions/cart_exception.dart';
 import 'package:prjgetxmvc/modules/cart/models/cart_request.dart';
@@ -13,6 +14,8 @@ class CartController extends GetxController {
   final cartList = <CartResponse>[].obs;
   final totalPrice = 0.0.obs;
   final isLoading = false.obs;
+  final isError = false.obs;
+  final errorMessage = RxnString();
   final priceFormatter = NumberFormat("#,##0", "vi_VN");
   final isEditMode = false.obs;
   final selectedProductIds = <int>{}.obs;
@@ -94,18 +97,21 @@ class CartController extends GetxController {
   }
 
   void loadCartList() {
+    isError.value = false;
+    errorMessage.value = null;
     try {
-      cartList.assignAll(Get.arguments["cart_list"]);
+      if (Get.arguments is! CartArgument) {
+        throw Exception("Dữ liệu không hợp lệ");
+      }
+      final argument = Get.arguments as CartArgument;
+      cartList.assignAll(argument.cartList);
       calculateTotalPrice();
     } on CartException catch (e) {
       cartList.clear();
       totalPrice.value = 0;
 
-      BaseSnackBar.showSnackBar(
-        title: 'Lỗi giỏ hàng',
-        content: e.message,
-        color: Colors.red,
-      );
+      isError.value = true;
+      errorMessage.value = e.toString().replaceAll("Exception: ", "");
     } catch (e, stackTrace) {
       cartList.clear();
       totalPrice.value = 0;
@@ -113,11 +119,8 @@ class CartController extends GetxController {
       debugPrint('Lỗi đọc giỏ hàng: $e');
       debugPrintStack(stackTrace: stackTrace);
 
-      BaseSnackBar.showSnackBar(
-        title: 'Lỗi',
-        content: 'Không thể tải danh sách giỏ hàng',
-        color: Colors.red,
-      );
+      isError.value = true;
+      errorMessage.value = e.toString().replaceAll("Exception: ", "");
     }
   }
 

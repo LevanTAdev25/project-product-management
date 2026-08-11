@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prjgetxmvc/cores/arguments/cart_argument.dart';
+import 'package:prjgetxmvc/cores/arguments/category_argument.dart';
+import 'package:prjgetxmvc/cores/arguments/form_product_argument.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
@@ -57,9 +60,9 @@ class ProductPage extends GetView<ProductController> {
                   onPressed: () async {
                     final result = await Get.toNamed(
                       AppPage.CART,
-                      arguments: {'cart_list': controller.cartList.toList()},
+                      arguments: CartArgument(cartList: controller.cartList),
                     );
-                    if (result == null) {
+                    if (result == null || result is! List<CartResponse>) {
                       return;
                     }
                     controller.cartList = result;
@@ -104,7 +107,7 @@ class ProductPage extends GetView<ProductController> {
             },
             suggestionsBuilder: (context, searchController) {
               final keyword = searchController.text.toLowerCase();
-              final result = controller.productList.where((product) {
+              final result = controller.displayedProducts.where((product) {
                 return product.name.toLowerCase().contains(keyword);
               });
               return result.map((product) {
@@ -211,18 +214,21 @@ class ProductPage extends GetView<ProductController> {
         key: const ValueKey("add_product"),
         backgroundColor: accentColor,
         foregroundColor: Colors.black,
-        onPressed: () {
+        onPressed: () async {
           try {
             if (controller.categoriesList.isEmpty) {
               throw CategoryEmptyListException();
             }
-            Get.toNamed(
+            final result = await Get.toNamed(
               AppPage.FORM_PRODUCT,
-              arguments: {
-                "isEdit": false,
-                "categories_list": controller.categoriesList.toList(),
-              },
+              arguments: FormProductArgument(
+                isEdit: false,
+                categoriesList: controller.categoriesList.toList(),
+              ),
             );
+            if (result is bool && result == true) {
+              await controller.loadProductList(reset: true);
+            }
           } catch (e) {
             BaseSnackBar.showSnackBar(
               title: "Lỗi",

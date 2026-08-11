@@ -52,14 +52,16 @@ class CartPage extends GetView<CartController> {
           backgroundColor: Colors.black,
         ),
         body: Obx(() {
-          if (controller.cartList.isEmpty) {
+          if (controller.cartList.isEmpty || controller.isError.value) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.inventory_2_outlined, color: Colors.grey),
-                  const Text(
-                    "Không có sản phẩm nào trong giỏ hàng",
+                  Text(
+                    controller.isError.value == false
+                        ? "Không có sản phẩm nào trong giỏ hàng"
+                        : controller.errorMessage.value!,
                     style: TextStyle(color: Colors.grey),
                   ),
                 ],

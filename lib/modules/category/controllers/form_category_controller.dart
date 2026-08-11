@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/exceptions/exceptions.dart';
+import 'package:prjgetxmvc/cores/arguments/category_argument.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
@@ -17,12 +18,11 @@ class FormCategoryController extends GetxController {
   final isLoading = false.obs;
   final isError = false.obs;
   final errorMessage = RxnString();
-  late List<CategoryResponse> categoryList;
+
   FormCategoryController(this._categoryRepository);
   @override
   void onInit() {
     super.onInit();
-    categoryList = Get.arguments["category_list"];
   }
 
   @override
@@ -64,18 +64,16 @@ class FormCategoryController extends GetxController {
 
         final response = await _categoryRepository.addCategory(categoryRequest);
         if (response != 0) {
-          categoryList.add(
-            CategoryResponse.mapToCategoryResponse(
-              categoryRequest.copyWith(id: response),
-            ),
+          final newCategory = CategoryResponse.mapToCategoryResponse(
+            categoryRequest.copyWith(id: response),
           );
-          Get.back(result: categoryList.toList());
+
+          Get.back(result: newCategory);
           BaseSnackBar.showSnackBar(
             title: "Thành công",
             content: "Bạn đã thêm danh mục thành công",
             color: Colors.green,
           );
-          isLoading.value = false;
         } else {
           throw CategoryException("Không thể thêm danh mục");
         }
