@@ -22,11 +22,11 @@ extension BuildProductDrawer on ProductPage {
             onTap: () async {
               final result = await Get.toNamed(
                 AppPage.CATEGORY_MANAGER,
-                arguments: {
-                  'categories_list': controller.categoriesList.toList(),
-                },
+                arguments: CategoryArgument(
+                  categoriesList: controller.categoriesList.toList(),
+                ),
               );
-              if (result == null) {
+              if (result == null || result is! List<CategoryResponse>) {
                 return;
               }
               controller.categoriesList.assignAll(result);

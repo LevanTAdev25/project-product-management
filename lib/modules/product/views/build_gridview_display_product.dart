@@ -102,15 +102,19 @@ extension BuildGridviewDisplayProduct on ProductPage {
                               color: ProductPage.textGray,
                               size: 18,
                             ),
-                            onPressed: () {
-                              Get.toNamed(
+                            onPressed: () async {
+                              final result = await Get.toNamed(
                                 AppPage.FORM_PRODUCT,
-                                arguments: {
-                                  "isEdit": true,
-                                  "current_product": product,
-                                  "categories_list": controller.categoriesList,
-                                },
+                                arguments: FormProductArgument(
+                                  isEdit: true,
+                                  currentProduct: product,
+                                  categoriesList: controller.categoriesList
+                                      .toList(),
+                                ),
                               );
+                              if (result is bool && result == true) {
+                                await controller.loadProductList(reset: true);
+                              }
                             },
                           ),
 

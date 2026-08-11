@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prjgetxmvc/cores/arguments/category_argument.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
@@ -8,7 +9,7 @@ import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/category/repositories/category_repository.dart';
-import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
+
 import 'package:prjgetxmvc/modules/product/models/product_request.dart';
 import 'package:prjgetxmvc/modules/product/models/product_response.dart';
 import 'package:prjgetxmvc/modules/product/repositories/product_repository.dart';
@@ -33,31 +34,26 @@ class CategoryController extends GetxController {
 
   void getCategoriesList() {
     if (isLoading.value) return;
+    if (Get.arguments is! CategoryArgument) {
+      throw Exception("Dữ liệu không hợp lệ");
+    }
+    final arguments = Get.arguments as CategoryArgument;
     isLoading.value = true;
     isError.value = false;
     errorMessage.value = null;
     try {
-      if (Get.arguments['categories_list'] is List &&
-          (Get.arguments['categories_list'] as List).isEmpty) {
+      if (arguments.categoriesList.isEmpty) {
         throw CategoryEmptyListException();
       }
-      categoriesList.assignAll(Get.arguments['categories_list']);
+      categoriesList.assignAll(arguments.categoriesList);
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } on CategoryEmptyListException catch (e) {
       isError.value = true;
       errorMessage.value = e.toString().replaceAll("Exception: ", "");
-      BaseSnackBar.showSnackBar(
-        title: "Lỗi",
-        content: e.toString().replaceAll("Exception: ", ""),
-        color: Colors.redAccent,
-      );
     } catch (e) {
-      BaseSnackBar.showSnackBar(
-        title: "Lỗi",
-        content: e.toString().replaceAll("Exception: ", ""),
-        color: Colors.redAccent,
-      );
+      isError.value = true;
+      errorMessage.value = e.toString().replaceAll("Exception: ", "");
     } finally {
       isLoading.value = false;
     }
@@ -99,8 +95,9 @@ class CategoryController extends GetxController {
           color: Colors.green,
         );
         isLoading.value = false;
-
-        await Get.find<ProductController>().loadCategoriesList();
+        if (categoriesList.isEmpty) {
+          throw CategoryEmptyListException();
+        }
       } else {
         throw CategoryException("Không thể xóa danh mục");
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
+import 'package:prjgetxmvc/cores/arguments/category_argument.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
 import 'package:prjgetxmvc/modules/category/controllers/category_controller.dart';
 import 'package:prjgetxmvc/modules/category/models/category_request.dart';
@@ -54,7 +55,7 @@ class CategoryManagerPage extends GetView<CategoryController> {
               trailing: IconButton(
                 onPressed: () async {
                   await controller.deleteCategory(
-                    CategoryRequest.mapToCartRequest(category),
+                    CategoryRequest.mapToCategoryRequest(category),
                   );
                 },
                 icon: Icon(Icons.delete),
@@ -67,14 +68,14 @@ class CategoryManagerPage extends GetView<CategoryController> {
         key: const ValueKey("add_category"),
         child: Icon(Icons.add),
         onPressed: () async {
-          final result = await Get.toNamed(
-            AppPage.CATEGORY,
-            arguments: {"category_list": controller.categoriesList.toList()},
-          );
-          if (result == null) {
+          final result = await Get.toNamed(AppPage.CATEGORY);
+          if (result is! CategoryResponse) {
+            debugPrint("Kiểu kết quả: ${result.runtimeType}");
             return;
           }
-          controller.categoriesList.assignAll(result);
+          controller.categoriesList.add(result);
+          controller.isError.value = false;
+          controller.errorMessage.value = null;
         },
       ),
     );

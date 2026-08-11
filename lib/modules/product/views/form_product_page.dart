@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
-import 'package:prjgetxmvc/cores/base/base_dialog.dart';
-import 'package:prjgetxmvc/cores/base/base_product_form.dart';
+import 'package:prjgetxmvc/cores/base/base_form_text_field.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/product/controllers/form_product_controller.dart';
+part 'build_textfield_product_form.dart';
 
 //
 class FormProductPage extends GetView<FormProductController> {
   @override
   Widget build(BuildContext context) {
-    final isEditProduct = Get.arguments['isEdit'];
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -20,7 +20,9 @@ class FormProductPage extends GetView<FormProductController> {
         ),
         backgroundColor: Colors.black,
         title: Text(
-          isEditProduct ? "Sửa thông tin sản phẩm" : "Thêm thông tin sản phẩm",
+          controller.isEditProduct
+              ? "Sửa thông tin sản phẩm"
+              : "Thêm thông tin sản phẩm",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -35,7 +37,10 @@ class FormProductPage extends GetView<FormProductController> {
             children: [
               Form(
                 key: controller.keyForm,
-                child: BaseForm(baseFormState: controller.isLoading.value),
+                child: _buildTextFieldProductForm(
+                  baseFormState: controller.isLoading.value,
+                  context: context,
+                ),
               ),
 
               ElevatedButton(
@@ -47,15 +52,11 @@ class FormProductPage extends GetView<FormProductController> {
                 ),
                 onPressed: controller.isLoading.value
                     ? null
-                    : isEditProduct == false
-                    ? () async {
-                        await controller.addProduct();
-                      }
-                    : () async {
-                        await controller.updateProduct();
-                      },
+                    : controller.saveData,
                 child: Text(
-                  isEditProduct == false ? "Thêm sản phẩm" : "Sửa sản phẩm",
+                  controller.isEditProduct == false
+                      ? "Thêm sản phẩm"
+                      : "Sửa sản phẩm",
                   style: TextStyle(color: Colors.white),
                 ),
               ),
