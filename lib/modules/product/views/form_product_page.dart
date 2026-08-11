@@ -19,15 +19,17 @@ class FormProductPage extends GetView<FormProductController> {
           icon: Icon(Icons.arrow_back, color: Colors.white),
         ),
         backgroundColor: Colors.black,
-        title: Text(
-          controller.isEditProduct
-              ? "Sửa thông tin sản phẩm"
-              : "Thêm thông tin sản phẩm",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-            fontSize: 22,
+        title: Obx(
+          () => Text(
+            controller.isEditProduct.value
+                ? "Sửa thông tin sản phẩm"
+                : "Thêm thông tin sản phẩm",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              fontSize: 22,
+            ),
           ),
         ),
       ),
@@ -54,7 +56,7 @@ class FormProductPage extends GetView<FormProductController> {
                     ? null
                     : controller.saveData,
                 child: Text(
-                  controller.isEditProduct == false
+                  controller.isEditProduct.value == false
                       ? "Thêm sản phẩm"
                       : "Sửa sản phẩm",
                   style: TextStyle(color: Colors.white),

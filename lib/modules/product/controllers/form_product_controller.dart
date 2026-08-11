@@ -34,7 +34,7 @@ class FormProductController extends GetxController {
   final stockProductFocusNode = FocusNode();
   final descriptionProductFocusNode = FocusNode();
   final imageProductFocusNode = FocusNode();
-  bool isEditProduct = false;
+  final isEditProduct = false.obs;
   FormProductController(this._productRepository);
   @override
   void onClose() {
@@ -60,7 +60,7 @@ class FormProductController extends GetxController {
   }
 
   void saveData() async {
-    isEditProduct ? await updateProduct() : await addProduct();
+    isEditProduct.value ? await updateProduct() : await addProduct();
   }
 
   void receiveData() {
@@ -69,7 +69,7 @@ class FormProductController extends GetxController {
     if (argument is! FormProductArgument) {
       return;
     }
-    isEditProduct = argument.isEdit;
+    isEditProduct.value = argument.isEdit;
     categoriesList.assignAll(argument.categoriesList);
     if (categoriesList.isEmpty) {
       selectedCategory.value = null;
