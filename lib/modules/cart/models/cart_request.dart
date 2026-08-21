@@ -49,34 +49,4 @@ class CartRequest {
       quantity: quantity ?? this.quantity,
     );
   }
-
-  factory CartRequest.mapToCartRequest(CartResponse cartResponse) {
-    return CartRequest(
-      id: cartResponse.id,
-      name: cartResponse.name,
-      code: cartResponse.code,
-      price: cartResponse.price,
-      stock: cartResponse.stock,
-      category: cartResponse.category,
-      description: cartResponse.description,
-      image: cartResponse.image,
-      quantity: cartResponse.quantity,
-    );
-  }
-  factory CartRequest.mapToCartRequestWithProductResponse(
-    ProductResponse productResponse,
-    int quantity,
-  ) {
-    return CartRequest(
-      id: productResponse.id,
-      name: productResponse.name,
-      code: productResponse.code,
-      price: productResponse.price,
-      stock: productResponse.stock,
-      category: productResponse.category,
-      description: productResponse.description,
-      image: productResponse.image,
-      quantity: quantity,
-    );
-  }
 }

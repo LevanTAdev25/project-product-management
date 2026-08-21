@@ -19,9 +19,14 @@ class CategoryController extends GetxController {
   final ProductRepository _productRepository;
   final isLoading = false.obs;
   final isError = false.obs;
-  final errorMessage = RxnString();
+  final errorMessage = RxString("");
   final categoriesList = <CategoryResponse>[].obs;
-  CategoryController(this._categoryRepository, this._productRepository);
+  final CategoryArgument _arguments;
+  CategoryController(
+    this._categoryRepository,
+    this._productRepository,
+    this._arguments,
+  );
   @override
   void onInit() {
     super.onInit();
@@ -34,18 +39,15 @@ class CategoryController extends GetxController {
 
   void getCategoriesList() {
     if (isLoading.value) return;
-    if (Get.arguments is! CategoryArgument) {
-      throw Exception("Dữ liệu không hợp lệ");
-    }
-    final arguments = Get.arguments as CategoryArgument;
+
     isLoading.value = true;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
-      if (arguments.categoriesList.isEmpty) {
+      if (_arguments.categoriesList.isEmpty) {
         throw CategoryEmptyListException();
       }
-      categoriesList.assignAll(arguments.categoriesList);
+      categoriesList.assignAll(_arguments.categoriesList);
     } on UnauthorizedException {
       BaseUnauthorized.handleUnauthorized();
     } on CategoryEmptyListException catch (e) {
@@ -63,7 +65,7 @@ class CategoryController extends GetxController {
     if (isLoading.value) return;
 
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       final result = await Get.dialog(
         BaseDialog(

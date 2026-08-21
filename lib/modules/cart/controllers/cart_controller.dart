@@ -15,11 +15,12 @@ class CartController extends GetxController {
   final totalPrice = 0.0.obs;
   final isLoading = false.obs;
   final isError = false.obs;
-  final errorMessage = RxnString();
+  final errorMessage = RxString("");
   final priceFormatter = NumberFormat("#,##0", "vi_VN");
   final isEditMode = false.obs;
   final selectedProductIds = <int>{}.obs;
-  CartController(this._cartBox);
+  final CartArgument _arguments;
+  CartController(this._cartBox, this._arguments);
   @override
   void onInit() {
     super.onInit();
@@ -98,13 +99,9 @@ class CartController extends GetxController {
 
   void loadCartList() {
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
-      if (Get.arguments is! CartArgument) {
-        throw Exception("Dữ liệu không hợp lệ");
-      }
-      final argument = Get.arguments as CartArgument;
-      cartList.assignAll(argument.cartList);
+      cartList.assignAll(_arguments.cartList);
       calculateTotalPrice();
     } on CartException catch (e) {
       cartList.clear();

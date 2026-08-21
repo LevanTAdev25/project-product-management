@@ -18,7 +18,7 @@ class FormProductController extends GetxController {
   final isLoading = false.obs;
   final isError = false.obs;
   final selectedCategory = Rx<CategoryResponse?>(null);
-  final errorMessage = RxnString();
+  final errorMessage = RxString("");
   int? idProduct;
   final categoriesList = <CategoryResponse>[].obs;
   final TextEditingController nameEditingController = TextEditingController();
@@ -35,7 +35,8 @@ class FormProductController extends GetxController {
   final descriptionProductFocusNode = FocusNode();
   final imageProductFocusNode = FocusNode();
   final isEditProduct = false.obs;
-  FormProductController(this._productRepository);
+  final FormProductArgument _arguments;
+  FormProductController(this._productRepository, this._arguments);
   @override
   void onClose() {
     nameEditingController.dispose();
@@ -64,18 +65,13 @@ class FormProductController extends GetxController {
   }
 
   void receiveData() {
-    final argument = Get.arguments;
-
-    if (argument is! FormProductArgument) {
-      return;
-    }
-    isEditProduct.value = argument.isEdit;
-    categoriesList.assignAll(argument.categoriesList);
+    isEditProduct.value = _arguments.isEdit;
+    categoriesList.assignAll(_arguments.categoriesList);
     if (categoriesList.isEmpty) {
       selectedCategory.value = null;
       return;
     }
-    final currentProduct = argument.currentProduct;
+    final currentProduct = _arguments.currentProduct;
 
     if (currentProduct == null) {
       selectedCategory.value = categoriesList.first;
@@ -108,7 +104,7 @@ class FormProductController extends GetxController {
   Future<void> addProduct() async {
     if (isLoading.value) return;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       if (keyForm.currentState!.validate()) {
         final result = await Get.dialog(
@@ -127,8 +123,13 @@ class FormProductController extends GetxController {
           code: codeEditingController.text,
           price: double.parse(priceEditingController.text),
           stock: int.parse(stockEditingController.text),
-          category: CategoryRequest.mapToCategoryRequest(
-            selectedCategory.value,
+          category: CategoryRequest(
+            id: selectedCategory.value == null
+                ? categoriesList.first.id
+                : selectedCategory.value!.id,
+            name: selectedCategory.value == null
+                ? categoriesList.first.name
+                : selectedCategory.value!.name,
           ),
           description: descriptionEditingController.text,
           image: imageEditingController.text,
@@ -162,7 +163,7 @@ class FormProductController extends GetxController {
   Future<void> updateProduct() async {
     if (isLoading.value) return;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       if (keyForm.currentState!.validate()) {
         final result = await Get.dialog<bool>(
@@ -181,8 +182,13 @@ class FormProductController extends GetxController {
           code: codeEditingController.text,
           price: double.parse(priceEditingController.text),
           stock: int.parse(stockEditingController.text),
-          category: CategoryRequest.mapToCategoryRequest(
-            selectedCategory.value,
+          category: CategoryRequest(
+            id: selectedCategory.value == null
+                ? categoriesList.first.id
+                : selectedCategory.value!.id,
+            name: selectedCategory.value == null
+                ? categoriesList.first.name
+                : selectedCategory.value!.name,
           ),
           description: descriptionEditingController.text,
           image: imageEditingController.text,

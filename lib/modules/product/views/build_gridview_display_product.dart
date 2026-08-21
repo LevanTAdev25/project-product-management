@@ -18,7 +18,7 @@ extension BuildGridviewDisplayProduct on ProductPage {
         return GestureDetector(
           onTap: () {
             controller.intentProduct = product;
-            Get.toNamed(AppPage.DETAIL_PRODUCT);
+            Get.toNamed(AppPage.detailProduct);
           },
           child: Container(
             decoration: BoxDecoration(
@@ -104,7 +104,7 @@ extension BuildGridviewDisplayProduct on ProductPage {
                             ),
                             onPressed: () async {
                               final result = await Get.toNamed(
-                                AppPage.FORM_PRODUCT,
+                                AppPage.formProduct,
                                 arguments: FormProductArgument(
                                   isEdit: true,
                                   currentProduct: product,

@@ -21,7 +21,7 @@ extension BuildProductDrawer on ProductPage {
             title: const Text("Quản lý danh mục"),
             onTap: () async {
               final result = await Get.toNamed(
-                AppPage.CATEGORY_MANAGER,
+                AppPage.categoryManager,
                 arguments: CategoryArgument(
                   categoriesList: controller.categoriesList.toList(),
                 ),

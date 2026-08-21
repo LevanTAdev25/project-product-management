@@ -61,7 +61,7 @@ class CartPage extends GetView<CartController> {
                   Text(
                     controller.isError.value == false
                         ? "Không có sản phẩm nào trong giỏ hàng"
-                        : controller.errorMessage.value!,
+                        : controller.errorMessage.value,
                     style: TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -125,8 +125,17 @@ class CartPage extends GetView<CartController> {
                             children: [
                               IconButton(
                                 onPressed: () async {
-                                  final productRequest =
-                                      CartRequest.mapToCartRequest(product);
+                                  final productRequest = CartRequest(
+                                    id: product.id,
+                                    name: product.name,
+                                    code: product.code,
+                                    price: product.price,
+                                    stock: product.stock,
+                                    category: product.category,
+                                    description: product.description,
+                                    image: product.image,
+                                    quantity: product.quantity,
+                                  );
                                   await controller.decreaseCart(
                                     productRequest.id,
                                   );
@@ -138,8 +147,17 @@ class CartPage extends GetView<CartController> {
 
                               IconButton(
                                 onPressed: () async {
-                                  final productRequest =
-                                      CartRequest.mapToCartRequest(product);
+                                  final productRequest = CartRequest(
+                                    id: product.id,
+                                    name: product.name,
+                                    code: product.code,
+                                    price: product.price,
+                                    stock: product.stock,
+                                    category: product.category,
+                                    description: product.description,
+                                    image: product.image,
+                                    quantity: product.quantity,
+                                  );
                                   await controller.increaseCart(
                                     productRequest.id,
                                   );
