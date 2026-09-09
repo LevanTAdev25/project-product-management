@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/exceptions/exceptions.dart';
+
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
 import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
+import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 
 import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
@@ -77,8 +78,9 @@ class FormCategoryController extends GetxController {
           throw CategoryException("Không thể thêm danh mục");
         }
       }
-    } on UnauthorizedException {
+    } on UnauthorizedException catch (e) {
       BaseUnauthorized.handleUnauthorized();
+      print(e);
     } catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Lỗi",

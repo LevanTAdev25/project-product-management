@@ -61,6 +61,8 @@ extension BuildTextfieldProductForm on FormProductPage {
           BaseFormTextField(
             context: context,
             maxLength: 300,
+            minLines: 5,
+            maxLines: 10,
             focusNode: controller.descriptionProductFocusNode,
             nextFocusNode: controller.imageProductFocusNode,
             label: "Mô tả",

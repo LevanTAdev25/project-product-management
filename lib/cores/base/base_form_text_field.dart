@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class BaseFormTextField extends StatelessWidget {
   final String label;
   final TextEditingController textController;
+  final int minLines;
+  final int maxLines;
   final int maxLength;
   final String emptyError;
   final BuildContext context;
@@ -20,6 +22,8 @@ class BaseFormTextField extends StatelessWidget {
     required this.context,
     required this.focusNode,
     required this.baseFormState,
+    this.minLines = 1,
+    this.maxLines = 1,
     this.nextFocusNode,
     this.isNumber = false,
     this.numberError,
@@ -30,7 +34,8 @@ class BaseFormTextField extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(10),
       child: TextFormField(
-        minLines: 1,
+        minLines: minLines,
+        maxLines: maxLines,
         maxLength: maxLength,
         enabled: !baseFormState,
         controller: textController,
