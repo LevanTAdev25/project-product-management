@@ -44,22 +44,24 @@ class FormProductPage extends GetView<FormProductController> {
                   context: context,
                 ),
               ),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  fixedSize: Size(300, 50),
-                  elevation: 5,
-                  shadowColor: Colors.grey,
-                  backgroundColor: Colors.black,
-                ),
-                onPressed: controller.isLoading.value
-                    ? null
-                    : controller.saveData,
-                child: Text(
-                  controller.isEditProduct.value == false
-                      ? "Thêm sản phẩm"
-                      : "Sửa sản phẩm",
-                  style: TextStyle(color: Colors.white),
+              Padding(
+                padding: EdgeInsetsGeometry.only(bottom: 16),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(300, 50),
+                    elevation: 5,
+                    shadowColor: Colors.grey,
+                    backgroundColor: Colors.black,
+                  ),
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : controller.saveData,
+                  child: Text(
+                    controller.isEditProduct.value == false
+                        ? "Thêm sản phẩm"
+                        : "Sửa sản phẩm",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],

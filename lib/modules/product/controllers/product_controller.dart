@@ -47,6 +47,7 @@ class ProductController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
   final SearchController searchController = SearchController();
+  final searchFocusNode = FocusNode();
 
   ProductController(this._productRepository, this._cartBox);
   @override
@@ -62,7 +63,7 @@ class ProductController extends GetxController {
   void onClose() {
     scrollController.dispose();
     searchController.dispose();
-
+    searchFocusNode.dispose();
     super.onClose();
   }
 

@@ -92,34 +92,42 @@ class ProductPage extends GetView<ProductController> {
             ),
           ),
           const SizedBox(height: 12),
-          SearchAnchor(
-            searchController: controller.searchController,
-            builder: (context, searchController) {
-              return SearchBar(
-                controller: searchController,
-                padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-                hintText: "Tìm kiếm sản phẩm",
-                onChanged: controller.searchProduct,
-                leading: Icon(Icons.search),
-              );
+          TapRegion(
+            onTapOutside: (_) {
+              controller.searchFocusNode.unfocus();
             },
-            suggestionsBuilder: (context, searchController) {
-              final keyword = searchController.text.toLowerCase();
-              final result = controller.displayedProducts.where((product) {
-                return product.name.toLowerCase().contains(keyword);
-              });
-              return result.map((product) {
-                return ListTile(
-                  title: Text(product.name),
-                  onTap: () {
-                    searchController.closeView(product.name);
-                    controller.searchProduct(product.name);
-                  },
+            child: SearchAnchor(
+              searchController: controller.searchController,
+              builder: (context, searchController) {
+                return SearchBar(
+                  controller: searchController,
+                  focusNode: controller.searchFocusNode,
+                  padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  hintText: "Tìm kiếm sản phẩm",
+                  onChanged: controller.searchProduct,
+                  leading: const Icon(Icons.search),
                 );
-              });
-            },
+              },
+              suggestionsBuilder: (context, searchController) {
+                final keyword = searchController.text.toLowerCase();
+
+                final result = controller.displayedProducts.where((product) {
+                  return product.name.toLowerCase().contains(keyword);
+                });
+
+                return result.map((product) {
+                  return ListTile(
+                    title: Text(product.name),
+                    onTap: () {
+                      searchController.closeView(product.name);
+                      controller.searchProduct(product.name);
+                    },
+                  );
+                });
+              },
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
