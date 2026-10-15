@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+//
 class BaseSnackBar {
   static void showSnackBar({
     required String title,
     required String content,
     required Color color,
   }) {
+    if (Get.isSnackbarOpen) return;
     Get.snackbar(
       title,
       content,

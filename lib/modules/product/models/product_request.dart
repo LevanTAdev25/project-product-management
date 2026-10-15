@@ -1,33 +1,42 @@
-import 'package:prjgetxmvc/modules/product/models/category.dart';
+import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 
+//
 class ProductRequest {
-  int id;
-  String name;
-  String code;
-  double price;
-  int stock;
-  Category category;
-  String description;
-  String image;
-  ProductRequest(
-    this.id,
-    this.name,
-    this.code,
-    this.price,
-    this.stock,
-    this.category,
-    this.description,
-    this.image,
-  );
-  static Map<String, dynamic> toJson(ProductRequest productRequest) {
+  int? page;
+  int? limit;
+  int? id;
+  String? name;
+  String? code;
+  double? price;
+  int? stock;
+  CategoryRequest? category;
+  String? description;
+  String? image;
+  ProductRequest.create({
+    required this.id,
+    required this.name,
+    required this.code,
+    required this.price,
+    required this.stock,
+    required this.category,
+    required this.description,
+    required this.image,
+  });
+  Map<String, dynamic> toJson() {
     return {
-      'name': productRequest.name,
-      'code': productRequest.code,
-      'price': productRequest.price,
-      'stock': productRequest.stock,
-      'category_id': productRequest.category.id,
-      'description': productRequest.description,
-      'image': productRequest.image,
+      'name': name,
+      'code': code,
+      'price': price,
+      'stock': stock,
+      'category_id': category!.id,
+      'description': description,
+      'image': image,
     };
   }
+
+  ProductRequest.query({
+    required this.page,
+    required this.limit,
+    required this.category,
+  });
 }

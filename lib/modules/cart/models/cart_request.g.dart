@@ -17,15 +17,15 @@ class CartRequestAdapter extends TypeAdapter<CartRequest> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return CartRequest(
-      fields[0] as int,
-      fields[1] as String,
-      fields[2] as String,
-      fields[3] as double,
-      fields[4] as int,
-      fields[5] as Category,
-      fields[6] as String,
-      fields[7] as String,
-      fields[8] as int,
+      id: fields[0] as int,
+      name: fields[1] as String,
+      code: fields[2] as String,
+      price: fields[3] as double,
+      stock: fields[4] as int,
+      category: fields[5] as CategoryResponse,
+      description: fields[6] as String,
+      image: fields[7] as String,
+      quantity: fields[8] as int,
     );
   }
 

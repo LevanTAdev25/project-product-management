@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:prjgetxmvc/cores/arguments/cart_argument.dart';
+import 'package:prjgetxmvc/cores/arguments/category_argument.dart';
+import 'package:prjgetxmvc/cores/arguments/form_product_argument.dart';
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
+import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
+import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
+import 'package:prjgetxmvc/modules/cart/models/cart_response.dart';
+import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/product/controllers/product_controller.dart';
-
+import 'package:prjgetxmvc/modules/product/models/product_response.dart';
+//
 part 'build_chip_filter_widget.dart';
+part 'show_delete_product_dialog.dart';
+part 'build_bottom_sheet_add_cart.dart';
+part 'build_product_drawer.dart';
+part 'build_gridview_display_product.dart';
 
 class ProductPage extends GetView<ProductController> {
   static const Color bgPrimary = Color(0xFF111416);
@@ -45,8 +57,16 @@ class ProductPage extends GetView<ProductController> {
                 backgroundColor: Colors.red,
                 child: IconButton(
                   icon: Icon(Icons.shopping_cart, color: Colors.white),
-                  onPressed: () {
-                    Get.toNamed(AppPage.CART);
+                  onPressed: () async {
+                    final result = await Get.toNamed(
+                      AppPage.cart,
+                      arguments: CartArgument(cartList: controller.cartList),
+                    );
+                    if (result == null || result is! List<CartResponse>) {
+                      return;
+                    }
+                    controller.cartList = result;
+                    await controller.countCartItem();
                   },
                 ),
               );
@@ -72,34 +92,42 @@ class ProductPage extends GetView<ProductController> {
             ),
           ),
           const SizedBox(height: 12),
-          SearchAnchor(
-            searchController: controller.searchController,
-            builder: (context, searchController) {
-              return SearchBar(
-                controller: searchController,
-                padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-                hintText: "Tìm kiếm sản phẩm",
-                onChanged: controller.searchProduct,
-                leading: Icon(Icons.search),
-              );
+          TapRegion(
+            onTapOutside: (_) {
+              controller.searchFocusNode.unfocus();
             },
-            suggestionsBuilder: (context, searchController) {
-              final keyword = searchController.text.toLowerCase();
-              final result = controller.productList.where((product) {
-                return product.name.toLowerCase().contains(keyword);
-              });
-              return result.map((product) {
-                return ListTile(
-                  title: Text(product.name),
-                  onTap: () {
-                    searchController.closeView(product.name);
-                    controller.searchProduct(product.name);
-                  },
+            child: SearchAnchor(
+              searchController: controller.searchController,
+              builder: (context, searchController) {
+                return SearchBar(
+                  controller: searchController,
+                  focusNode: controller.searchFocusNode,
+                  padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  hintText: "Tìm kiếm sản phẩm",
+                  onChanged: controller.searchProduct,
+                  leading: const Icon(Icons.search),
                 );
-              });
-            },
+              },
+              suggestionsBuilder: (context, searchController) {
+                final keyword = searchController.text.toLowerCase();
+
+                final result = controller.displayedProducts.where((product) {
+                  return product.name.toLowerCase().contains(keyword);
+                });
+
+                return result.map((product) {
+                  return ListTile(
+                    title: Text(product.name),
+                    onTap: () {
+                      searchController.closeView(product.name);
+                      controller.searchProduct(product.name);
+                    },
+                  );
+                });
+              },
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -125,6 +153,7 @@ class ProductPage extends GetView<ProductController> {
                       title: category.name,
                       isSelected: isSelected,
                       onTap: () async {
+                        controller.searchController.clear();
                         controller.selectedCategory.value = category;
                         await controller.loadProductList();
                       },
@@ -164,163 +193,12 @@ class ProductPage extends GetView<ProductController> {
                   ),
                 );
               }
-              if (controller.displayedProducts.isEmpty) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.inventory_2_outlined, color: Colors.grey),
-                      Text(
-                        "Không có sản phẩm nào thuộc danh mục này",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
               return RefreshIndicator(
                 key: controller.refreshIndicatorKey,
                 onRefresh: controller.handleRefresh,
                 child: Stack(
                   children: [
-                    GridView.builder(
-                      controller: controller.scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 0.62,
-                      ),
-                      itemCount: controller.displayedProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = controller.displayedProducts[index];
-                        return GestureDetector(
-                          onTap: () {
-                            controller.intentProduct = product;
-                            Get.toNamed(AppPage.DETAIL_PRODUCT);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: bgCard,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              children: [
-                                Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(8),
-                                      ),
-                                      child: Image.network(
-                                        product.image,
-                                        height: 130,
-                                        width: double.infinity,
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Container(
-                                                height: 130,
-                                                color: Colors.grey[900],
-                                                child: const Icon(
-                                                  Icons.image_not_supported,
-                                                  color: textGray,
-                                                ),
-                                              );
-                                            },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        textAlign: TextAlign.center,
-                                        product.name,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "${controller.formatter.format(product.price)}đ",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            constraints: const BoxConstraints(),
-                                            padding: const EdgeInsets.all(6),
-                                            icon: const Icon(
-                                              Icons.add_shopping_cart,
-                                              color: accentColor,
-                                              size: 20,
-                                            ),
-                                            onPressed: () {
-                                              controller.addToCart(product);
-                                            },
-                                          ),
-                                          const SizedBox(width: 4),
-
-                                          IconButton(
-                                            constraints: const BoxConstraints(),
-                                            padding: const EdgeInsets.all(6),
-                                            icon: const Icon(
-                                              Icons.edit,
-                                              color: textGray,
-                                              size: 18,
-                                            ),
-                                            onPressed: () {
-                                              controller
-                                                  .updateTextEditingController(
-                                                    currentProduct: product,
-                                                  );
-                                              Get.toNamed(
-                                                AppPage.FORM_PRODUCT,
-                                                arguments: {"isEdit": true},
-                                              );
-                                            },
-                                          ),
-
-                                          IconButton(
-                                            constraints: const BoxConstraints(),
-                                            padding: const EdgeInsets.all(6),
-                                            icon: const Icon(
-                                              Icons.delete,
-                                              color: Colors.redAccent,
-                                              size: 18,
-                                            ),
-                                            onPressed: () =>
-                                                _showDeleteDialog(product),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                    _buildGridViewDisplayProduct(),
                     Obx(() {
                       if (!controller.isLoadingMore.value) {
                         return const SizedBox();
@@ -341,61 +219,15 @@ class ProductPage extends GetView<ProductController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        key: const ValueKey("add_product"),
         backgroundColor: accentColor,
         foregroundColor: Colors.black,
         onPressed: () {
-          try {
-            controller.selectedCategory.value = controller.categoriesList.first;
-            controller.updateTextEditingController();
-            Get.toNamed(AppPage.FORM_PRODUCT, arguments: {"isEdit": false});
-          } catch (e) {
-            Get.snackbar(
-              "Lỗi",
-              "Không kết nối được tới server",
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-            );
-          }
+          controller.checkNavigateToFormProduct();
         },
         child: Icon(Icons.add),
       ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Row(
-                children: [
-                  CircleAvatar(child: Icon(Icons.person)),
-                  Padding(
-                    padding: EdgeInsets.all(20),
-                    child: const Text("Xin chào cuongpc10"),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: const Text("Đăng xuất"),
-              onTap: () {
-                controller.logout();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteDialog(dynamic product) {
-    Get.dialog(
-      BaseDialog(
-        title: "Xác nhận xóa",
-        content: "Bạn có muốn xóa sản phẩm này không?",
-        onPressYes: () {
-          controller.removeProduct(product.id);
-          Get.back();
-        },
-      ),
+      drawer: _buildProductDrawer(),
     );
   }
 }
