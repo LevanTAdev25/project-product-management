@@ -7,7 +7,7 @@ class CategoryBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<CategoryRepository>(() => CategoryRepository());
     Get.lazyPut<CategoryController>(
-      () => CategoryController(Get.find(), Get.find()),
+      () => CategoryController(Get.find(), Get.find(), Get.arguments),
       fenix: true,
     );
   }

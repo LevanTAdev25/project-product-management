@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/exceptions/exceptions.dart';
-import 'package:prjgetxmvc/cores/arguments/category_argument.dart';
+
 import 'package:prjgetxmvc/cores/base/base_dialog.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
 import 'package:prjgetxmvc/cores/exceptions/category_exception.dart';
-import 'package:prjgetxmvc/modules/category/controllers/category_controller.dart';
+import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
+
 import 'package:prjgetxmvc/modules/category/models/category_request.dart';
 import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 import 'package:prjgetxmvc/modules/category/repositories/category_repository.dart';
@@ -17,7 +17,7 @@ class FormCategoryController extends GetxController {
   final keyCategoryForm = GlobalKey<FormState>();
   final isLoading = false.obs;
   final isError = false.obs;
-  final errorMessage = RxnString();
+  final errorMessage = RxString("");
 
   FormCategoryController(this._categoryRepository);
   @override
@@ -44,7 +44,7 @@ class FormCategoryController extends GetxController {
   Future<void> addCategory() async {
     if (isLoading.value) return;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       final categoryRequest = CategoryRequest(
         id: 999,
@@ -78,8 +78,9 @@ class FormCategoryController extends GetxController {
           throw CategoryException("Không thể thêm danh mục");
         }
       }
-    } on UnauthorizedException {
+    } on UnauthorizedException catch (e) {
       BaseUnauthorized.handleUnauthorized();
+      print(e);
     } catch (e) {
       BaseSnackBar.showSnackBar(
         title: "Lỗi",

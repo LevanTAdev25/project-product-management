@@ -55,7 +55,7 @@ class CategoryManagerPage extends GetView<CategoryController> {
               trailing: IconButton(
                 onPressed: () async {
                   await controller.deleteCategory(
-                    CategoryRequest.mapToCategoryRequest(category),
+                    CategoryRequest(id: category.id, name: category.name),
                   );
                 },
                 icon: Icon(Icons.delete),
@@ -68,14 +68,14 @@ class CategoryManagerPage extends GetView<CategoryController> {
         key: const ValueKey("add_category"),
         child: Icon(Icons.add),
         onPressed: () async {
-          final result = await Get.toNamed(AppPage.CATEGORY);
+          final result = await Get.toNamed(AppPage.category);
           if (result is! CategoryResponse) {
             debugPrint("Kiểu kết quả: ${result.runtimeType}");
             return;
           }
           controller.categoriesList.add(result);
           controller.isError.value = false;
-          controller.errorMessage.value = null;
+          controller.errorMessage.value = "";
         },
       ),
     );

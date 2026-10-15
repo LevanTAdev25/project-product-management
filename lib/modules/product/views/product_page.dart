@@ -59,7 +59,7 @@ class ProductPage extends GetView<ProductController> {
                   icon: Icon(Icons.shopping_cart, color: Colors.white),
                   onPressed: () async {
                     final result = await Get.toNamed(
-                      AppPage.CART,
+                      AppPage.cart,
                       arguments: CartArgument(cartList: controller.cartList),
                     );
                     if (result == null || result is! List<CartResponse>) {
@@ -92,34 +92,42 @@ class ProductPage extends GetView<ProductController> {
             ),
           ),
           const SizedBox(height: 12),
-          SearchAnchor(
-            searchController: controller.searchController,
-            builder: (context, searchController) {
-              return SearchBar(
-                controller: searchController,
-                padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
-                  EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-                hintText: "Tìm kiếm sản phẩm",
-                onChanged: controller.searchProduct,
-                leading: Icon(Icons.search),
-              );
+          TapRegion(
+            onTapOutside: (_) {
+              controller.searchFocusNode.unfocus();
             },
-            suggestionsBuilder: (context, searchController) {
-              final keyword = searchController.text.toLowerCase();
-              final result = controller.displayedProducts.where((product) {
-                return product.name.toLowerCase().contains(keyword);
-              });
-              return result.map((product) {
-                return ListTile(
-                  title: Text(product.name),
-                  onTap: () {
-                    searchController.closeView(product.name);
-                    controller.searchProduct(product.name);
-                  },
+            child: SearchAnchor(
+              searchController: controller.searchController,
+              builder: (context, searchController) {
+                return SearchBar(
+                  controller: searchController,
+                  focusNode: controller.searchFocusNode,
+                  padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
+                    EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  hintText: "Tìm kiếm sản phẩm",
+                  onChanged: controller.searchProduct,
+                  leading: const Icon(Icons.search),
                 );
-              });
-            },
+              },
+              suggestionsBuilder: (context, searchController) {
+                final keyword = searchController.text.toLowerCase();
+
+                final result = controller.displayedProducts.where((product) {
+                  return product.name.toLowerCase().contains(keyword);
+                });
+
+                return result.map((product) {
+                  return ListTile(
+                    title: Text(product.name),
+                    onTap: () {
+                      searchController.closeView(product.name);
+                      controller.searchProduct(product.name);
+                    },
+                  );
+                });
+              },
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -214,28 +222,8 @@ class ProductPage extends GetView<ProductController> {
         key: const ValueKey("add_product"),
         backgroundColor: accentColor,
         foregroundColor: Colors.black,
-        onPressed: () async {
-          try {
-            if (controller.categoriesList.isEmpty) {
-              throw CategoryEmptyListException();
-            }
-            final result = await Get.toNamed(
-              AppPage.FORM_PRODUCT,
-              arguments: FormProductArgument(
-                isEdit: false,
-                categoriesList: controller.categoriesList.toList(),
-              ),
-            );
-            if (result is bool && result == true) {
-              await controller.loadProductList(reset: true);
-            }
-          } catch (e) {
-            BaseSnackBar.showSnackBar(
-              title: "Lỗi",
-              content: e.toString().replaceAll("Exception: ", ""),
-              color: Colors.redAccent,
-            );
-          }
+        onPressed: () {
+          controller.checkNavigateToFormProduct();
         },
         child: Icon(Icons.add),
       ),

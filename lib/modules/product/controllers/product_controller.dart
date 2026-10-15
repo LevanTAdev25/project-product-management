@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:prjgetxmvc/cores/arguments/form_product_argument.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/base/base_unauthorized.dart';
 import 'package:prjgetxmvc/cores/exceptions/cart_exception.dart';
@@ -30,7 +31,7 @@ class ProductController extends GetxController {
   final originalList = <ProductResponse>[];
   final categoriesList = <CategoryResponse>[].obs;
   final selectedCategory = Rx<CategoryResponse?>(null);
-  final errorMessage = RxnString();
+  final errorMessage = RxString("");
   final displayedProducts = <ProductResponse>[].obs;
   final countItem = 0.obs;
   final quantity = 1.obs;
@@ -46,6 +47,7 @@ class ProductController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
   final SearchController searchController = SearchController();
+  final searchFocusNode = FocusNode();
 
   ProductController(this._productRepository, this._cartBox);
   @override
@@ -61,7 +63,7 @@ class ProductController extends GetxController {
   void onClose() {
     scrollController.dispose();
     searchController.dispose();
-
+    searchFocusNode.dispose();
     super.onClose();
   }
 
@@ -112,7 +114,7 @@ class ProductController extends GetxController {
     if (isLoading.value) return;
     isLoading.value = true;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       _page = 1;
       _hasMore = true;
@@ -125,8 +127,9 @@ class ProductController extends GetxController {
         ProductRequest.query(
           page: _page,
           limit: _limit,
-          category: CategoryRequest.mapToCategoryRequest(
-            selectedCategory.value,
+          category: CategoryRequest(
+            id: selectedCategory.value?.id ?? 0,
+            name: selectedCategory.value?.name ?? "",
           ),
         ),
       );
@@ -153,7 +156,7 @@ class ProductController extends GetxController {
     if (isLoading.value) return;
     isLoading.value = true;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       categoriesList.assignAll(await _productRepository.getCategoriesList());
       if (categoriesList.isEmpty) {
@@ -182,14 +185,16 @@ class ProductController extends GetxController {
             ProductRequest.query(
               page: nextPage,
               limit: _limit,
-              category: CategoryRequest.mapToCategoryRequest(
-                selectedCategory.value,
+              category: CategoryRequest(
+                id: selectedCategory.value?.id ?? 0,
+                name: selectedCategory.value?.name ?? "",
               ),
             ),
           );
       if (newProductList.isEmpty) {
         _hasMore = false;
       } else {
+        originalList.addAll(newProductList);
         displayedProducts.addAll(newProductList);
         _page++;
         if (newProductList.length < _limit) {
@@ -210,7 +215,7 @@ class ProductController extends GetxController {
     if (isLoading.value) return;
     isLoading.value = true;
     isError.value = false;
-    errorMessage.value = null;
+    errorMessage.value = "";
     try {
       final response = await _productRepository.removeProduct(id);
       if (response) {
@@ -249,9 +254,16 @@ class ProductController extends GetxController {
     required int quantity,
   }) async {
     try {
-      final cartRequest = CartRequest.mapToCartRequestWithProductResponse(
-        productResponse,
-        quantity,
+      final cartRequest = CartRequest(
+        id: productResponse.id,
+        name: productResponse.name,
+        code: productResponse.code,
+        price: productResponse.price,
+        stock: productResponse.stock,
+        category: productResponse.category,
+        description: productResponse.description,
+        image: productResponse.image,
+        quantity: quantity,
       );
       final currentCart = _cartBox.get(cartRequest.id);
       if (currentCart != null) {
@@ -333,6 +345,30 @@ class ProductController extends GetxController {
     }
   }
 
+  void checkNavigateToFormProduct() async {
+    try {
+      if (categoriesList.isEmpty) {
+        throw CategoryEmptyListException();
+      }
+      final result = await Get.toNamed(
+        AppPage.formProduct,
+        arguments: FormProductArgument(
+          isEdit: false,
+          categoriesList: categoriesList.toList(),
+        ),
+      );
+      if (result is bool && result == true) {
+        await loadProductList(reset: true);
+      }
+    } catch (e) {
+      BaseSnackBar.showSnackBar(
+        title: "Lỗi",
+        content: e.toString().replaceAll("Exception: ", ""),
+        color: Colors.redAccent,
+      );
+    }
+  }
+
   void logout() async {
     final authService = Get.find<AuthService>();
 
@@ -343,6 +379,6 @@ class ProductController extends GetxController {
       content: "Bạn đã đăng xuất thành công",
       color: Colors.green,
     );
-    Get.offAllNamed(AppPage.LOGIN);
+    Get.offAllNamed(AppPage.login);
   }
 }

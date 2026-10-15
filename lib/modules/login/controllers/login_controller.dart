@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:prjgetxmvc/cores/base/base_handle_response.dart';
 import 'package:prjgetxmvc/cores/base/base_snack_bar.dart';
 import 'package:prjgetxmvc/cores/exceptions/unauthorized_exception.dart';
 import 'package:prjgetxmvc/cores/routes/page_app.dart';
@@ -64,7 +63,7 @@ class LoginController extends GetxController {
           backgroundColor: Colors.green,
           borderColor: Colors.white,
         );
-        Get.offAndToNamed(AppPage.PRODUCTS);
+        Get.offAndToNamed(AppPage.products);
       } else {
         throw Exception("Không thể đăng nhập");
       }

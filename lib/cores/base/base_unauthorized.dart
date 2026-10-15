@@ -20,7 +20,7 @@ class BaseUnauthorized {
         colorText: Colors.white,
       );
 
-      Get.offAllNamed(AppPage.LOGIN);
+      Get.offAllNamed(AppPage.login);
     } finally {
       _isHandling = false;
     }

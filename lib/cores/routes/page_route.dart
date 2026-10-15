@@ -17,44 +17,44 @@ import 'package:prjgetxmvc/modules/splash/bindings/splash_binding.dart';
 import 'package:prjgetxmvc/modules/splash/views/splash_page.dart';
 
 class AppRoute {
-  static final INITIAL = AppPage.INITIAL;
+  static final initial = AppPage.initial;
   static final pages = [
     GetPage(
-      name: AppRoute.INITIAL,
+      name: AppRoute.initial,
       page: () => SplashPage(),
       binding: SplashBinding(),
     ),
     GetPage(
-      name: AppPage.LOGIN,
+      name: AppPage.login,
       page: () => LoginPage(),
       binding: LoginBinding(),
     ),
     GetPage(
-      name: AppPage.PRODUCTS,
+      name: AppPage.products,
       page: () => ProductPage(),
       binding: ProductBinding(),
     ),
     GetPage(
-      name: AppPage.FORM_PRODUCT,
+      name: AppPage.formProduct,
       page: () => FormProductPage(),
       binding: FormProductBinding(),
     ),
     GetPage(
-      name: AppPage.CATEGORY,
+      name: AppPage.category,
       page: () => AddCategoryPage(),
       binding: FormCategoryBinding(),
     ),
     GetPage(
-      name: AppPage.CATEGORY_MANAGER,
+      name: AppPage.categoryManager,
       page: () => CategoryManagerPage(),
       binding: CategoryBinding(),
     ),
     GetPage(
-      name: AppPage.DETAIL_PRODUCT,
+      name: AppPage.detailProduct,
       page: () => DetailProductPage(),
       binding: ProductBinding(),
     ),
-    GetPage(name: AppPage.CART, page: () => CartPage(), binding: CartBinding()),
+    GetPage(name: AppPage.cart, page: () => CartPage(), binding: CartBinding()),
   ];
 }
 

@@ -5,7 +5,7 @@ class FormProductBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<FormProductController>(
-      () => FormProductController(Get.find()),
+      () => FormProductController(Get.find(), Get.arguments),
       fenix: true,
     );
   }
