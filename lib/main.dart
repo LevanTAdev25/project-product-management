@@ -10,6 +10,7 @@ import 'package:prjgetxmvc/modules/category/models/category_response.dart';
 //
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   try {
     await Hive.initFlutter();
     Hive.registerAdapter(CategoryResponseAdapter());
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: AppRoute.initial,
       getPages: AppRoute.pages,
     );
